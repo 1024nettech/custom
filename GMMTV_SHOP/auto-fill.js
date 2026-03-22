@@ -1,2 +1,550 @@
-const _0x171f8e = _0x6393; (function (_0x4a8e5d, _0x5db291) { const _0x1d04f8 = _0x6393, _0x3027e3 = _0x4a8e5d(); while (!![]) { try { const _0x482ce2 = -parseInt(_0x1d04f8(0xb2)) / 0x1 * (parseInt(_0x1d04f8(0xa6)) / 0x2) + -parseInt(_0x1d04f8(0xe0)) / 0x3 * (-parseInt(_0x1d04f8(0xbe)) / 0x4) + -parseInt(_0x1d04f8(0xc7)) / 0x5 + parseInt(_0x1d04f8(0x9c)) / 0x6 + parseInt(_0x1d04f8(0x9d)) / 0x7 + -parseInt(_0x1d04f8(0x74)) / 0x8 + -parseInt(_0x1d04f8(0xad)) / 0x9 * (parseInt(_0x1d04f8(0x80)) / 0xa); if (_0x482ce2 === _0x5db291) break; else _0x3027e3['push'](_0x3027e3['shift']()); } catch (_0x34106a) { _0x3027e3['push'](_0x3027e3['shift']()); } } }(_0x1f90, 0xdda27)); function sleep(_0x36cb8a) { return new Promise(_0x11e84e => setTimeout(_0x11e84e, _0x36cb8a)); } async function waitForElementByText(_0x38a760 = _0x171f8e(0x7b), _0x1f2660 = 0xa, _0x2ee604 = 0x186a0) { const _0x4a700e = _0x171f8e, _0x41d57e = Date[_0x4a700e(0xe1)](); return new Promise((_0x869a80, _0x3150f6) => { const _0x1e1b2d = () => { const _0x26ed97 = _0x6393; if (Date['now']() - _0x41d57e > _0x2ee604) { _0x3150f6(new Error(_0x26ed97(0xbf) + _0x2ee604 + _0x26ed97(0x8f) + _0x38a760 + _0x26ed97(0xd9))); return; } const _0x464f4d = document['querySelector'](_0x26ed97(0xd5)); if (_0x464f4d && _0x464f4d['textContent'][_0x26ed97(0xda)]() === _0x38a760) { _0x869a80(_0x464f4d); return; } setTimeout(_0x1e1b2d, _0x1f2660); }; _0x1e1b2d(); }); } function findLinkByText(_0x42c036) { const _0x31f8a8 = _0x171f8e, _0x4d4d6a = document['querySelectorAll']('a'); for (const _0x5e5a26 of _0x4d4d6a) { if (_0x5e5a26[_0x31f8a8(0xac)][_0x31f8a8(0xda)]()[_0x31f8a8(0x83)](_0x42c036)) return _0x5e5a26; } return null; } function triggerUserEvents(_0x3cbe1b, _0x14d324 = _0x171f8e(0xbc)) { const _0x1b7e53 = _0x171f8e; if (!_0x3cbe1b) return; _0x3cbe1b['dispatchEvent'](new MouseEvent(_0x1b7e53(0x92), { 'bubbles': !![] })), _0x3cbe1b[_0x1b7e53(0xc5)](new MouseEvent('mousedown', { 'bubbles': !![], 'cancelable': !![], 'button': 0x0 })), _0x3cbe1b[_0x1b7e53(0xc5)](new MouseEvent(_0x1b7e53(0x7f), { 'bubbles': !![], 'cancelable': !![], 'button': 0x0 })), _0x3cbe1b['dispatchEvent'](new MouseEvent(_0x14d324, { 'bubbles': !![], 'cancelable': !![] })), _0x3cbe1b[_0x1b7e53(0xc5)](new FocusEvent('focus', { 'bubbles': !![] })), _0x3cbe1b[_0x1b7e53(0xc5)](new FocusEvent('blur', { 'bubbles': !![] })); window[_0x1b7e53(0xc1)]?.[_0x1b7e53(0xde)]?.['trigger'] && (window[_0x1b7e53(0xc1)][_0x1b7e53(0xde)]['trigger'](_0x3cbe1b, _0x14d324), window[_0x1b7e53(0xc1)][_0x1b7e53(0xde)]['trigger'](_0x3cbe1b, _0x1b7e53(0xdf)), window[_0x1b7e53(0xc1)]['jsaction'][_0x1b7e53(0xd6)](_0x3cbe1b, _0x1b7e53(0xc8))); const _0x62debf = _0x3cbe1b[_0x1b7e53(0x90)]('jsaction') || ''; _0x62debf && _0x62debf[_0x1b7e53(0xb5)](';')[_0x1b7e53(0xce)](_0x4c592f => _0x4c592f[_0x1b7e53(0xb5)](':'))[_0x1b7e53(0x75)](([_0x225444, _0x53b74a]) => { _0x225444 && _0x53b74a && _0x3cbe1b['dispatchEvent'](new CustomEvent(_0x225444, { 'bubbles': !![], 'cancelable': !![], 'detail': { 'action': _0x53b74a } })); }); } async function handleFirstPageForm() { const _0x331c81 = _0x171f8e; console[_0x331c81(0xcd)](_0x331c81(0xbd)); const _0x426844 = document['querySelector'](_0x331c81(0xdb)); if (!_0x426844) return console[_0x331c81(0xb0)](_0x331c81(0xa8)), ![]; return _0x426844[_0x331c81(0xbc)](), _0x426844[_0x331c81(0x76)]('aria-checked', 'true'), triggerUserEvents(_0x426844), [_0x331c81(0x91), _0x331c81(0xdd), _0x331c81(0xc9)][_0x331c81(0x75)](_0x5ab6ed => { const _0x3a0bfe = _0x331c81; _0x426844[_0x3a0bfe(0xc5)](new Event(_0x5ab6ed, { 'bubbles': !![] })); }), console[_0x331c81(0xcd)](_0x331c81(0x79)), await waitForElementByText(), setTimeout(() => { const _0x3c0ede = _0x331c81; let _0x5c63c8 = Array[_0x3c0ede(0xcb)](document[_0x3c0ede(0xae)]('[role=\x22button\x22]'))['find'](_0x2ed789 => _0x2ed789['textContent'][_0x3c0ede(0xda)]()[_0x3c0ede(0x83)](_0x3c0ede(0xa9))); if (!_0x5c63c8) _0x5c63c8 = document[_0x3c0ede(0x9b)](_0x3c0ede(0x8e)); if (!_0x5c63c8) _0x5c63c8 = document[_0x3c0ede(0x9b)](_0x3c0ede(0xd2)); if (!_0x5c63c8) return console[_0x3c0ede(0xb0)]('❌\x20未找到Next按钮'), ![]; triggerUserEvents(_0x5c63c8), console[_0x3c0ede(0xcd)](_0x3c0ede(0x86)); }, 0x64), !![]; } function fillFormInputs(_0x27da9f, _0x18cd28, _0x553669) { const _0x10e06a = _0x171f8e; console[_0x10e06a(0xcd)]('📝\x20开始填充表单输入框'); const _0x5c7029 = document[_0x10e06a(0xae)](_0x10e06a(0x72)); if (_0x5c7029['length'] === 0x0) return console[_0x10e06a(0xb0)](_0x10e06a(0xaa)), ![]; const _0x260e92 = (_0x151d15, _0x383c7) => { const _0x3cab84 = _0x10e06a; if (!_0x151d15 || !_0x383c7) return ![]; let _0x1d6090 = _0x151d15[_0x3cab84(0x9b)]('form\x20input[jsname=\x22YPqjbf\x22]') || _0x151d15[_0x3cab84(0x9b)](_0x3cab84(0xc4)); if (!_0x1d6090) return console[_0x3cab84(0xb0)]('❌\x20未找到输入框元素'), ![]; return _0x1d6090['focus'](), _0x1d6090[_0x3cab84(0xcc)] = '', _0x1d6090[_0x3cab84(0xc5)](new Event('input', { 'bubbles': !![] })), _0x1d6090['value'] = _0x383c7, _0x1d6090[_0x3cab84(0xc5)](new Event(_0x3cab84(0x91), { 'bubbles': !![] })), _0x1d6090['dispatchEvent'](new Event(_0x3cab84(0xdd), { 'bubbles': !![] })), _0x1d6090[_0x3cab84(0xc5)](new Event(_0x3cab84(0xc9), { 'bubbles': !![] })), window[_0x3cab84(0xc1)]?.[_0x3cab84(0xde)]?.[_0x3cab84(0xd6)] && window[_0x3cab84(0xc1)][_0x3cab84(0xde)]['trigger'](_0x1d6090, _0x3cab84(0x91)), console[_0x3cab84(0xcd)](_0x3cab84(0x85) + _0x383c7), !![]; }; if (_0x5c7029[0x0]) _0x260e92(_0x5c7029[0x0], _0x27da9f); if (_0x5c7029[0x1]) _0x260e92(_0x5c7029[0x1], _0x18cd28); if (_0x5c7029[0x2]) _0x260e92(_0x5c7029[0x2], _0x553669); return console[_0x10e06a(0xcd)]('✅\x20所有指定输入框填充完成'), !![]; } function selectRadioButton() { const _0xd9905 = _0x171f8e; console[_0xd9905(0xcd)](_0xd9905(0xd0)); let _0x265a20 = document[_0xd9905(0x9b)](_0xd9905(0x8d)); if (!_0x265a20) return console['error']('❌\x20未找到目标单选按钮'), ![]; if (_0x265a20['getAttribute'](_0xd9905(0xa3)) === _0xd9905(0x84)) return console[_0xd9905(0xcd)](_0xd9905(0xb4)), !![]; return _0x265a20[_0xd9905(0xca)](), triggerUserEvents(_0x265a20), _0x265a20[_0xd9905(0x76)](_0xd9905(0xa3), 'true'), _0x265a20[_0xd9905(0xc5)](new Event(_0xd9905(0xdd), { 'bubbles': !![] })), console[_0xd9905(0xcd)](_0xd9905(0x9a)), !![]; } function submitForm() { const _0x1b9db7 = _0x171f8e; console[_0x1b9db7(0xcd)](_0x1b9db7(0xa5)); let _0x1a4502 = document['querySelector'](_0x1b9db7(0xba)); !_0x1a4502 && (_0x1a4502 = Array[_0x1b9db7(0xcb)](document[_0x1b9db7(0xae)](_0x1b9db7(0x81)))[_0x1b9db7(0x7d)](_0x2d3649 => _0x2d3649[_0x1b9db7(0xac)]['trim']()[_0x1b9db7(0x83)](_0x1b9db7(0x8b)))); !_0x1a4502 && (_0x1a4502 = document[_0x1b9db7(0x9b)](_0x1b9db7(0x73))); if (!_0x1a4502) return console[_0x1b9db7(0xb0)](_0x1b9db7(0xd1)), ![]; triggerUserEvents(_0x1a4502); const _0x2bc411 = _0x1a4502[_0x1b9db7(0x77)](_0x1b9db7(0x88)); return _0x2bc411 && _0x2bc411[_0x1b9db7(0xc5)](new Event('submit', { 'bubbles': !![], 'cancelable': !![] })), console[_0x1b9db7(0xcd)](_0x1b9db7(0xd7)), !![]; } function _0x1f90() { const _0x55cb16 = ['getItem', '保存数据', '手机：', 'style', '❌\x20表单自动处理过程中出错：', 'Submit\x20another\x20response', 'placeholder', '✅\x20单选按钮已选中', 'querySelector', '9951000OTmaEO', '12057241jhIVbv', 'wrapperx', 'phone', 'DOMContentLoaded', 'setItem', 'addEventListener', 'aria-checked', 'phoneInput', '📝\x20开始提交表单', '411722ShlJSn', '数据保存成功！', '❌\x20未找到复选框元素', 'Next', '❌\x20未找到任何.geS5n输入框容器', 'savex', 'textContent', '9SpqjPW', 'querySelectorAll', '\x0a\x20\x20\x20\x20\x20\x20\x20\x20#wrapperx\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:260px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:161px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20top:\x2023px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20right:\x2095px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20z-index:\x209999;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background-color:\x20white;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x2020px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x201px\x20solid\x20rgb(204,\x20204,\x20204);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x208px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20box-shadow:\x20rgba(0,\x200,\x200,\x200.1)\x200px\x202px\x2010px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20#wrapperx\x20label\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin:\x205px\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20inline-block;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20#wrapperx\x20input\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20200px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x205px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20margin:\x205px\x200\x2010px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x201px\x20solid\x20#ccc;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20#wrapperx\x20button\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x208px\x2016px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background-color:\x20rgb(76,\x20175,\x2080);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20color:\x20white;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border:\x20none;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20border-radius:\x204px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20cursor:\x20pointer;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20#wrapperx\x20button:hover\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background-color:\x20#45a049;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20表单页面样式优化\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.teQAzf\x20{\x20width:\x2090vw\x20!important;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20.vnFTpb\x20{\x20display:\x20none\x20!important;\x20}\x20/*\x20隐藏头部图片\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.N0gd6\x20{\x20padding:\x200\x20!important;\x20}\x20\x20\x20\x20\x20\x20/*\x20调整首个大标题内边距\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20隐藏冗余文本/区域\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.cBGGJ,\x20.zAVwcb,\x20.md0UAd,\x20.gubaDc,\x0a\x20\x20\x20\x20\x20\x20\x20\x20.nYdzXd,\x20.T2dutf,\x20form+div,\x20.wJFUN\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20输入框容器样式调整\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.geS5n\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20relative;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x200\x2024px\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20表单子模块标题样式\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.z12JJ\x20{\x20margin:\x2010px\x200\x20!important;\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20输入框/单选框位置调整（右对齐）\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.z12JJ+div\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20absolute;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20right:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20单选/复选框列表横向排列\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.SG0AAe\x20{\x20justify-content:\x20unset\x20!important;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20.nWQGrd,\x20.eBFwI\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20auto\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20inline-block\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20提交按钮固定位置\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.QvWxOd\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20fixed\x20!important;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20top:\x2030px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20right:\x20400px;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20', 'error', 'label', '6lXwTaK', '姓名：', 'ℹ️\x20单选按钮已选中，无需重复操作', 'split', 'passportInput', 'text', 'passport', 'appendChild', '[aria-label=\x22Submit\x22][role=\x22button\x22]', 'complete', 'click', '📝\x20开始处理表单第一页', '19408duExQa', '超时(', 'button', 'google', 'createElement', 'stringify', 'form\x20input.whsOnd.zHQkBf', 'dispatchEvent', '请输入姓名', '5853715QDHEwM', 'JIbuQc', 'blur', 'focus', 'from', 'value', 'log', 'map', 'head', '📝\x20开始选择单选按钮', '❌\x20未找到Submit提交按钮', '.ThHDze\x20.lRwqcd\x20[role=\x22button\x22]', 'name', '护照：', 'div.pMDWAf', 'trigger', '✅\x20表单提交操作已触发', 'div', '\x22\x20的元素', 'trim', 'div[role=\x22checkbox\x22]', 'getElementById', 'change', 'jsaction', 'rcuQ6b', '105eaoldG', 'now', 'form\x20.geS5n', '[jsname=\x22M2UYVd\x22][role=\x22button\x22]', '243440deyvar', 'forEach', 'setAttribute', 'closest', '请填写完整的表单数据！', '✅\x20复选框已勾选', 'formData', 'Draft\x20saved', 'type', 'find', 'div[role=\x22radio\x22]', 'mouseup', '2066290lyzHgZ', '[role=\x22button\x22]', '请先填写表单数据并保存！', 'includes', 'true', '✅\x20输入框填充完成：', '✅\x20Next按钮已点击', '请输入手机号', 'form', 'parse', 'readyState', 'Submit', '请输入护照号', 'form\x20div[role=\x22radio\x22]', '[jsname=\x22OCpkoe\x22]', 'ms)：未找到文本为\x20\x22', 'getAttribute', 'input', 'mouseenter']; _0x1f90 = function () { return _0x55cb16; }; return _0x1f90(); } async function initApp() { const _0x199f9d = _0x171f8e; createInputUI(); const _0x5e6c5b = getFormDataFromLocalStorage(); if (!_0x5e6c5b[_0x199f9d(0xd3)] || !_0x5e6c5b[_0x199f9d(0x9f)] || !_0x5e6c5b[_0x199f9d(0xb8)]) { alert(_0x199f9d(0x82)); return; } await main(_0x5e6c5b); } function createInputUI() { const _0x481cb0 = _0x171f8e, _0x150811 = document[_0x481cb0(0xc2)](_0x481cb0(0x96)); _0x150811['textContent'] = _0x481cb0(0xaf), document[_0x481cb0(0xcf)][_0x481cb0(0xb9)](_0x150811); const _0x186f8a = document[_0x481cb0(0xc2)](_0x481cb0(0xd8)); _0x186f8a['id'] = _0x481cb0(0x9e); const _0x36904b = document[_0x481cb0(0xc2)](_0x481cb0(0xb1)); _0x36904b[_0x481cb0(0xac)] = _0x481cb0(0xb3); const _0x4222a4 = document[_0x481cb0(0xc2)](_0x481cb0(0x91)); _0x4222a4['id'] = 'nameInput', _0x4222a4[_0x481cb0(0x7c)] = 'text', _0x4222a4[_0x481cb0(0x99)] = _0x481cb0(0xc6); const _0x17d701 = document[_0x481cb0(0xc2)]('label'); _0x17d701[_0x481cb0(0xac)] = _0x481cb0(0x95); const _0x29cf81 = document[_0x481cb0(0xc2)](_0x481cb0(0x91)); _0x29cf81['id'] = _0x481cb0(0xa4), _0x29cf81['type'] = _0x481cb0(0xb7), _0x29cf81[_0x481cb0(0x99)] = _0x481cb0(0x87); const _0x2bf27f = document['createElement'](_0x481cb0(0xb1)); _0x2bf27f[_0x481cb0(0xac)] = _0x481cb0(0xd4); const _0x375ba7 = document[_0x481cb0(0xc2)](_0x481cb0(0x91)); _0x375ba7['id'] = _0x481cb0(0xb6), _0x375ba7[_0x481cb0(0x7c)] = 'text', _0x375ba7[_0x481cb0(0x99)] = _0x481cb0(0x8c); const _0x2f5f25 = document[_0x481cb0(0xc2)](_0x481cb0(0xc0)); _0x2f5f25['id'] = _0x481cb0(0xab), _0x2f5f25[_0x481cb0(0xac)] = _0x481cb0(0x94), _0x2f5f25[_0x481cb0(0xa2)](_0x481cb0(0xbc), saveFormDataToLocalStorage); const _0x142452 = document['createElement']('br'); _0x186f8a['appendChild'](_0x36904b), _0x186f8a[_0x481cb0(0xb9)](_0x4222a4), _0x186f8a[_0x481cb0(0xb9)](_0x142452), _0x186f8a['appendChild'](_0x17d701), _0x186f8a['appendChild'](_0x29cf81), _0x186f8a[_0x481cb0(0xb9)](_0x142452), _0x186f8a[_0x481cb0(0xb9)](_0x2bf27f), _0x186f8a['appendChild'](_0x375ba7), _0x186f8a['appendChild'](_0x142452), _0x186f8a[_0x481cb0(0xb9)](_0x2f5f25), document['body'][_0x481cb0(0xb9)](_0x186f8a); const _0x14e28a = getFormDataFromLocalStorage(); if (_0x14e28a[_0x481cb0(0xd3)]) document[_0x481cb0(0xdc)]('nameInput')['value'] = _0x14e28a['name']; if (_0x14e28a['phone']) document[_0x481cb0(0xdc)](_0x481cb0(0xa4))[_0x481cb0(0xcc)] = _0x14e28a[_0x481cb0(0x9f)]; if (_0x14e28a['passport']) document[_0x481cb0(0xdc)]('passportInput')['value'] = _0x14e28a['passport']; } function getFormDataFromLocalStorage() { const _0x3637e2 = _0x171f8e; try { const _0x267825 = localStorage[_0x3637e2(0x93)](_0x3637e2(0x7a)); return _0x267825 ? JSON[_0x3637e2(0x89)](_0x267825) : {}; } catch (_0x25eca) { return console[_0x3637e2(0xb0)]('读取本地存储失败：', _0x25eca), {}; } } function saveFormDataToLocalStorage() { const _0x588dbd = _0x171f8e, _0x18dcee = document['getElementById']('nameInput')['value'][_0x588dbd(0xda)](), _0x20644f = document[_0x588dbd(0xdc)](_0x588dbd(0xa4))[_0x588dbd(0xcc)][_0x588dbd(0xda)](), _0x37e691 = document[_0x588dbd(0xdc)](_0x588dbd(0xb6))[_0x588dbd(0xcc)][_0x588dbd(0xda)](); if (!_0x18dcee || !_0x20644f || !_0x37e691) { alert(_0x588dbd(0x78)); return; } const _0x53890b = { 'name': _0x18dcee, 'phone': _0x20644f, 'passport': _0x37e691 }; localStorage[_0x588dbd(0xa1)](_0x588dbd(0x7a), JSON[_0x588dbd(0xc3)](_0x53890b)), alert(_0x588dbd(0xa7)); } async function main(_0x81bfab) { const _0x1e7690 = _0x171f8e; try { const _0x241f89 = findLinkByText(_0x1e7690(0x98)), _0x552e11 = document[_0x1e7690(0x9b)](_0x1e7690(0x7e)); _0x552e11 && !_0x241f89 ? (fillFormInputs(_0x81bfab[_0x1e7690(0xd3)], _0x81bfab[_0x1e7690(0x9f)], _0x81bfab[_0x1e7690(0xb8)]), await waitForElementByText(), selectRadioButton(), await waitForElementByText(), submitForm()) : await handleFirstPageForm(); } catch (_0x47a8ce) { console['error'](_0x1e7690(0x97), _0x47a8ce); } } function _0x6393(_0x1960b4, _0x596e38) { _0x1960b4 = _0x1960b4 - 0x72; const _0x1f907d = _0x1f90(); let _0x63934b = _0x1f907d[_0x1960b4]; return _0x63934b; } document[_0x171f8e(0x8a)] === _0x171f8e(0xbb) || document['readyState'] === 'interactive' ? initApp() : document[_0x171f8e(0xa2)](_0x171f8e(0xa0), initApp);
-// End-533-2026.03.22.153202
+/**
+ * 休眠函数：返回一个指定毫秒后resolve的Promise
+ * @param {number} ms - 休眠毫秒数
+ * @returns {Promise<void>} Promise对象
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * 等待指定文本的元素出现（核心用于等待Draft saved状态提示）
+ * @param {string} targetText - 目标匹配文本，默认"Draft saved"
+ * @param {number} interval - 轮询检查间隔(ms)，默认10ms
+ * @param {number} timeout - 超时时间(ms)，默认100000ms
+ * @returns {Promise<HTMLElement>} 找到的目标元素Promise
+ * @rejects {Error} 超时未找到元素时抛出错误
+ */
+async function waitForElementByText(
+    targetText = "Draft saved",
+    interval = 10,
+    timeout = 100000
+) {
+    const startTime = Date.now();
+
+    return new Promise((resolve, reject) => {
+        // 轮询检查函数
+        const checkElement = () => {
+            // 1. 超时判断：超过设定时间则拒绝Promise
+            if (Date.now() - startTime > timeout) {
+                reject(new Error(`超时(${timeout}ms)：未找到文本为 "${targetText}" 的元素`));
+                return;
+            }
+
+            // 2. 查找目标元素并验证文本
+            const targetElement = document.querySelector('div.pMDWAf');
+            if (targetElement && targetElement.textContent.trim() === targetText) {
+                resolve(targetElement);
+                return;
+            }
+
+            // 3. 未找到则继续轮询
+            setTimeout(checkElement, interval);
+        };
+
+        // 启动首次检查
+        checkElement();
+    });
+}
+
+/**
+ * 根据文本内容查找页面中的链接元素
+ * @param {string} text - 要匹配的链接文本（包含匹配）
+ * @returns {HTMLElement|null} 匹配的a标签元素，未找到返回null
+ */
+function findLinkByText(text) {
+    const links = document.querySelectorAll('a');
+    for (const link of links) {
+        if (link.textContent.trim().includes(text)) {
+            return link;
+        }
+    }
+    return null;
+}
+
+/**
+ * 模拟完整的用户交互事件（通用事件触发工具函数）
+ * 覆盖鼠标事件、焦点事件、谷歌jsaction框架事件
+ * @param {HTMLElement} element - 目标操作元素
+ * @param {string} [eventType='click'] - 主要触发的事件类型，默认click
+ */
+function triggerUserEvents(element, eventType = 'click') {
+    if (!element) return;
+
+    // 1. 模拟完整鼠标事件流（进入→按下→松开→点击）
+    element.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    element.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true, cancelable: true, button: 0
+    }));
+    element.dispatchEvent(new MouseEvent('mouseup', {
+        bubbles: true, cancelable: true, button: 0
+    }));
+    element.dispatchEvent(new MouseEvent(eventType, {
+        bubbles: true, cancelable: true
+    }));
+
+    // 2. 模拟焦点事件（聚焦→失焦）
+    element.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    element.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+
+    // 3. 触发谷歌jsaction框架内置事件
+    if (window.google?.jsaction?.trigger) {
+        window.google.jsaction.trigger(element, eventType);
+        window.google.jsaction.trigger(element, 'rcuQ6b');
+        window.google.jsaction.trigger(element, 'JIbuQc');
+    }
+
+    // 4. 解析并触发元素上的jsaction自定义事件
+    const jsActionStr = element.getAttribute('jsaction') || '';
+    if (jsActionStr) {
+        jsActionStr.split(';').map(pair => pair.split(':'))
+            .forEach(([eventName, methodName]) => {
+                if (eventName && methodName) {
+                    element.dispatchEvent(new CustomEvent(eventName, {
+                        bubbles: true,
+                        cancelable: true,
+                        detail: { action: methodName }
+                    }));
+                }
+            });
+    }
+}
+
+// ======================== 表单操作核心函数 ========================
+
+/**
+ * 处理表单第一页：勾选复选框并点击Next按钮
+ * @returns {Promise<boolean>} 操作是否成功
+ */
+async function handleFirstPageForm() {
+    console.log('📝 开始处理表单第一页');
+
+    // 1. 定位并勾选复选框
+    const checkbox = document.querySelector('div[role="checkbox"]');
+    if (!checkbox) {
+        console.error('❌ 未找到复选框元素');
+        return false;
+    }
+
+    // 触发复选框点击并强制更新选中状态
+    checkbox.click();
+    checkbox.setAttribute('aria-checked', 'true');
+    triggerUserEvents(checkbox);
+
+    // 同步表单状态变更事件
+    ['input', 'change', 'blur'].forEach(eventType => {
+        checkbox.dispatchEvent(new Event(eventType, { bubbles: true }));
+    });
+    console.log('✅ 复选框已勾选');
+
+    // 等待草稿保存状态确认
+    await waitForElementByText();
+
+    // 2. 延迟点击Next按钮（确保状态同步完成）
+    setTimeout(() => {
+        // 多策略定位Next按钮（提高兼容性）
+        let nextButton = Array.from(document.querySelectorAll('[role="button"]'))
+            .find(btn => btn.textContent.trim().includes('Next'));
+        if (!nextButton) nextButton = document.querySelector('[jsname="OCpkoe"]');
+        if (!nextButton) nextButton = document.querySelector('.ThHDze .lRwqcd [role="button"]');
+
+        if (!nextButton) {
+            console.error('❌ 未找到Next按钮');
+            return false;
+        }
+
+        // 触发按钮完整交互事件
+        triggerUserEvents(nextButton);
+        console.log('✅ Next按钮已点击');
+    }, 100);
+
+    return true;
+}
+
+/**
+ * 填充表单输入框（定位前3个.geS5n容器内的输入框）
+ * @param {string} name - 姓名（填充第一个输入框）
+ * @param {string} phone - 电话（填充第二个输入框）
+ * @param {string} passport - 护照ID（填充第三个输入框）
+ * @returns {boolean} 填充是否成功
+ */
+function fillFormInputs(name, phone, passport) {
+    console.log('📝 开始填充表单输入框');
+
+    // 获取所有.geS5n输入框容器
+    const inputContainers = document.querySelectorAll('form .geS5n');
+    if (inputContainers.length === 0) {
+        console.error('❌ 未找到任何.geS5n输入框容器');
+        return false;
+    }
+
+    /**
+     * 填充单个输入框的核心逻辑
+     * @param {HTMLElement} container - 输入框容器
+     * @param {string} value - 要填充的值
+     * @returns {boolean} 填充是否成功
+     */
+    const fillInput = (container, value) => {
+        if (!container || !value) return false;
+
+        // 多策略定位输入框元素
+        let input = container.querySelector('form input[jsname="YPqjbf"]') ||
+            container.querySelector('form input.whsOnd.zHQkBf');
+
+        if (!input) {
+            console.error('❌ 未找到输入框元素');
+            return false;
+        }
+
+        // 模拟完整用户输入流程
+        input.focus();          // 聚焦
+        input.value = '';       // 清空原有值
+        input.dispatchEvent(new Event('input', { bubbles: true })); // 触发输入事件
+        input.value = value;    // 设置新值
+        input.dispatchEvent(new Event('input', { bubbles: true })); // 触发输入事件
+        input.dispatchEvent(new Event('change', { bubbles: true }));// 触发变更事件
+        input.dispatchEvent(new Event('blur', { bubbles: true }));  // 失焦
+
+        // 触发谷歌表单内置输入事件
+        if (window.google?.jsaction?.trigger) {
+            window.google.jsaction.trigger(input, 'input');
+        }
+
+        console.log(`✅ 输入框填充完成：${value}`);
+        return true;
+    };
+
+    // 依次填充前三个输入框
+    if (inputContainers[0]) fillInput(inputContainers[0], name);
+    if (inputContainers[1]) fillInput(inputContainers[1], phone);
+    if (inputContainers[2]) fillInput(inputContainers[2], passport);
+
+    console.log('✅ 所有指定输入框填充完成');
+    return true;
+}
+
+/**
+ * 选择表单单选按钮（默认选择第一个radio元素）
+ * @returns {boolean} 选择是否成功
+ */
+function selectRadioButton() {
+    console.log('📝 开始选择单选按钮');
+
+    // 定位目标单选按钮
+    let radioBtn = document.querySelector('form div[role="radio"]');
+
+    if (!radioBtn) {
+        console.error('❌ 未找到目标单选按钮');
+        return false;
+    }
+
+    // 跳过已选中的情况
+    if (radioBtn.getAttribute('aria-checked') === 'true') {
+        console.log('ℹ️ 单选按钮已选中，无需重复操作');
+        return true;
+    }
+
+    // 模拟用户选择操作
+    radioBtn.focus();
+    triggerUserEvents(radioBtn);
+    radioBtn.setAttribute('aria-checked', 'true');
+    radioBtn.dispatchEvent(new Event('change', { bubbles: true }));
+
+    console.log('✅ 单选按钮已选中');
+    return true;
+}
+
+/**
+ * 提交表单（防重复提交，多策略定位提交按钮）
+ * @returns {boolean} 提交操作是否触发成功
+ */
+function submitForm() {
+    console.log('📝 开始提交表单');
+
+    // 多策略定位提交按钮
+    let submitButton = document.querySelector('[aria-label="Submit"][role="button"]');
+    if (!submitButton) {
+        submitButton = Array.from(document.querySelectorAll('[role="button"]'))
+            .find(btn => btn.textContent.trim().includes('Submit'));
+    }
+    if (!submitButton) {
+        submitButton = document.querySelector('[jsname="M2UYVd"][role="button"]');
+    }
+
+    if (!submitButton) {
+        console.error('❌ 未找到Submit提交按钮');
+        return false;
+    }
+
+    // 触发提交按钮完整交互事件
+    triggerUserEvents(submitButton);
+
+    // 触发表单原生提交事件
+    const form = submitButton.closest('form');
+    if (form) {
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
+
+    console.log('✅ 表单提交操作已触发');
+    return true;
+}
+
+// ======================== UI与数据存储函数 ========================
+
+/**
+ * 初始化应用：创建UI → 读取本地存储 → 检查数据 → 启动主程序
+ */
+async function initApp() {
+    // 1. 创建用户输入界面（用于填写/保存姓名、电话、护照）
+    createInputUI();
+
+    // 2. 从localStorage读取已保存的表单数据
+    const savedFormData = getFormDataFromLocalStorage();
+
+    // 3. 检查数据完整性，不完整则提示用户
+    if (!savedFormData.name || !savedFormData.phone || !savedFormData.passport) {
+        alert('请先填写表单数据并保存！');
+        return;
+    }
+
+    // 4. 数据完整则启动主程序
+    await main(savedFormData);
+}
+
+/**
+ * 创建用户输入UI：包含姓名/电话/护照输入框 + 保存按钮 + 样式美化
+ * 同时包含表单页面的样式优化（精简布局、调整元素位置）
+ */
+function createInputUI() {
+    // 1. 创建样式表（UI样式 + 表单页面优化样式）
+    const style = document.createElement('style');
+    style.textContent = `
+        #wrapperx {
+            width:260px;
+            height:161px;
+            position: fixed;
+            top: 23px;
+            right: 95px;
+            z-index: 9999;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid rgb(204, 204, 204);
+            border-radius: 8px;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px;
+        }
+
+        #wrapperx label {
+            margin: 5px 0;
+            display: inline-block;
+        }
+
+        #wrapperx input {
+            width: 200px;
+            padding: 5px;
+            margin: 5px 0 10px;
+            border: 1px solid #ccc;
+        }
+
+        #wrapperx button {
+            padding: 8px 16px;
+            background-color: rgb(76, 175, 80);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #wrapperx button:hover {
+            background-color: #45a049;
+        }
+
+        /* 表单页面样式优化 */
+        .teQAzf { width: 90vw !important; }
+        .vnFTpb { display: none !important; } /* 隐藏头部图片 */
+        .N0gd6 { padding: 0 !important; }      /* 调整首个大标题内边距 */
+        
+        /* 隐藏冗余文本/区域 */
+        .cBGGJ, .zAVwcb, .md0UAd, .gubaDc,
+        .nYdzXd, .T2dutf, form+div, .wJFUN {
+            display: none !important;
+        }
+
+        /* 输入框容器样式调整 */
+        .geS5n {
+            position: relative;
+            padding: 0 24px !important;
+        }
+
+        /* 表单子模块标题样式 */
+        .z12JJ { margin: 10px 0 !important; }
+
+        /* 输入框/单选框位置调整（右对齐） */
+        .z12JJ+div {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        /* 单选/复选框列表横向排列 */
+        .SG0AAe { justify-content: unset !important; }
+        .nWQGrd, .eBFwI {
+            width: auto !important;
+            display: inline-block !important;
+        }
+
+        /* 提交按钮固定位置 */
+        .QvWxOd {
+            position: fixed !important;
+            top: 30px;
+            right: 400px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. 创建UI容器
+    const wrapper = document.createElement('div');
+    wrapper.id = 'wrapperx';
+
+    // 3. 创建姓名输入项
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = '姓名：';
+    const nameInput = document.createElement('input');
+    nameInput.id = 'nameInput';
+    nameInput.type = 'text';
+    nameInput.placeholder = '请输入姓名';
+
+    // 4. 创建手机输入项
+    const phoneLabel = document.createElement('label');
+    phoneLabel.textContent = '手机：';
+    const phoneInput = document.createElement('input');
+    phoneInput.id = 'phoneInput';
+    phoneInput.type = 'text';
+    phoneInput.placeholder = '请输入手机号';
+
+    // 5. 创建护照输入项
+    const passportLabel = document.createElement('label');
+    passportLabel.textContent = '护照：';
+    const passportInput = document.createElement('input');
+    passportInput.id = 'passportInput';
+    passportInput.type = 'text';
+    passportInput.placeholder = '请输入护照号';
+
+    // 6. 创建保存按钮（绑定保存事件）
+    const saveBtn = document.createElement('button');
+    saveBtn.id = 'savex';
+    saveBtn.textContent = '保存数据';
+    saveBtn.addEventListener('click', saveFormDataToLocalStorage);
+
+    // 6. 创建清除按钮（绑定保存事件）
+    const clearBtn = document.createElement('button');
+    clearBtn.id = 'clearx';
+    clearBtn.textContent = '清除数据';
+    clearBtn.addEventListener('click', clearLocalStorage);
+
+    // 7. 组装UI元素
+    const br = document.createElement('br');
+    wrapper.appendChild(nameLabel);
+    wrapper.appendChild(nameInput);
+    wrapper.appendChild(br);
+    wrapper.appendChild(phoneLabel);
+    wrapper.appendChild(phoneInput);
+    wrapper.appendChild(br);
+    wrapper.appendChild(passportLabel);
+    wrapper.appendChild(passportInput);
+    wrapper.appendChild(br);
+    wrapper.appendChild(saveBtn);
+    wrapper.appendChild(clearBtn);
+
+    // 8. 将UI添加到页面
+    document.body.appendChild(wrapper);
+
+    // 9. 填充已保存的数据到输入框（回显）
+    const savedData = getFormDataFromLocalStorage();
+    if (savedData.name) document.getElementById('nameInput').value = savedData.name;
+    if (savedData.phone) document.getElementById('phoneInput').value = savedData.phone;
+    if (savedData.passport) document.getElementById('passportInput').value = savedData.passport;
+}
+
+/**
+ * 从localStorage读取表单数据
+ * @returns {Object} 包含name/phone/passport的对象（无数据则返回空对象）
+ */
+function getFormDataFromLocalStorage() {
+    try {
+        const data = localStorage.getItem('formData');
+        return data ? JSON.parse(data) : {};
+    } catch (error) {
+        console.error('读取本地存储失败：', error);
+        return {};
+    }
+}
+
+/**
+ * 将输入框中的数据保存到localStorage
+ * 保存前会验证数据完整性（姓名/电话/护照不能为空）
+ */
+function saveFormDataToLocalStorage() {
+    // 获取并清洗输入值
+    const name = document.getElementById('nameInput').value.trim();
+    const phone = document.getElementById('phoneInput').value.trim();
+    const passport = document.getElementById('passportInput').value.trim();
+
+    // 验证数据完整性
+    if (!name || !phone || !passport) {
+        alert('请填写完整的表单数据！');
+        return;
+    }
+
+    // 保存到本地存储
+    const formData = { name, phone, passport };
+    localStorage.setItem('formData', JSON.stringify(formData));
+    alert('数据保存成功！');
+}
+
+// 清除localStorage数据
+function clearLocalStorage() {
+    localStorage.clear();
+    document.getElementById('nameInput').value = "";
+    document.getElementById('phoneInput').value = "";
+    document.getElementById('passportInput').value = "";
+    alert('数据清除成功！');
+}
+
+// ======================== 主程序逻辑 ========================
+
+/**
+ * 主程序：根据页面类型自动处理表单
+ * @param {Object} FORM_DATA - 包含name/phone/passport的表单数据
+ */
+async function main(FORM_DATA) {
+    try {
+        // 页面类型判断：检测是否是提交后的页面
+        const submitAnotherLink = findLinkByText('Submit another response');
+        const radioButton = document.querySelector('div[role="radio"]');
+
+        // 分支逻辑：处理不同页面
+        if (radioButton && !submitAnotherLink) {
+            // 非第一页：填充输入框 → 等待保存 → 选单选按钮 → 等待保存 → （可选提交）
+            fillFormInputs(FORM_DATA.name, FORM_DATA.phone, FORM_DATA.passport);
+            await waitForElementByText();
+            selectRadioButton();
+            await waitForElementByText();
+            submitForm();
+        } else {
+            // 第一页：勾选复选框 + 点击Next按钮
+            await handleFirstPageForm();
+        }
+    } catch (error) {
+        console.error('❌ 表单自动处理过程中出错：', error);
+    }
+}
+
+// 启动应用
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initApp();
+} else {
+    // 如果 DOM 还没准备好，就等它准备好
+    document.addEventListener('DOMContentLoaded', initApp);
+}
+// End-550-2026.03.22.155424
