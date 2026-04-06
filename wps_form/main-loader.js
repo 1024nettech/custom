@@ -1,6 +1,5 @@
 import * as publics from "/lib/js/modules/public.js"
 const url = location.href;
-alert();
 function loadSuccess(response) {
     // 加载成功后do
     let versionData = publics.parseJson(response.responseText);
