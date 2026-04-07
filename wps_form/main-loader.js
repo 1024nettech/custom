@@ -24,6 +24,6 @@ function update() {
     // 脚本更新
     publics.sendRequest(version_url, "", "GET", loadSuccess);
 }
-let version_url = `https: //1024nettech.github.io/custom/wps_form/version.json?t=${Date.now()}`;
+let version_url = `https://1024nettech.github.io/custom/wps_form/version.json?t=${Date.now()}`;
 update();
 // End-29-2026.04.07.162518
