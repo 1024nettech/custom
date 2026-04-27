@@ -23,7 +23,7 @@ function fillWpsInput(element, value) {
 }
 
 // 核心填充逻辑
-async function executeBatchFill() {
+async function executeBatchFill0() {
     const allFields = await entries();
     const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO, STORAGE_KEY_DELAY];
     const dataFields = allFields.filter(([key]) => !configKeys.includes(key));
@@ -48,6 +48,45 @@ async function executeBatchFill() {
         console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
     }
 }
+
+// 核心填充逻辑
+async function executeBatchFill() {
+    const allFields = await entries();
+    const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO, STORAGE_KEY_DELAY];
+    const dataFields = allFields.filter(([key]) => !configKeys.includes(key));
+
+    let successCount = 0;
+    dataFields.forEach(([_, fieldData]) => {
+        if (fieldData.title && fieldData.value) {
+            const result = doRealFill(fieldData.title, fieldData.value, fieldData.type);
+            if (result) successCount++;
+        }
+    });
+
+    if (successCount > 0) {
+        // 新增判断：如果页面包含“暂未开始收集”提示，则终止提交
+        const isNotStarted = $("body").text().includes("当前暂未开始收集表单");
+
+        if (isNotStarted) {
+            console.log(`⚠️ 页面显示“暂未开始收集”，已完成 ${successCount} 个字段填充，停止自动提交。`);
+            return; // 提前退出，不执行后续点击逻辑
+        }
+
+        // 正常提交逻辑
+        $(".src-components-write-footer-index__submitBtn").click();
+        let t = setInterval(() => {
+            const $confirmBtn = $(".ksapc-btn-middle.ksapc-btn-primary:contains(确 认)");
+            if ($confirmBtn.length) {
+                $confirmBtn.click();
+                clearInterval(t);
+            }
+        }, 100);
+        console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
+    }
+}
+
+
+
 
 async function createPanel() {
     const isAuto = await get(STORAGE_KEY_AUTO) || false;
@@ -174,4 +213,4 @@ function doRealFill(title, value, type) {
 }
 
 $(createPanel);
-// End-177-2026.04.27.085900
+// End-216-2026.04.27.103738
