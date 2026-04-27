@@ -64,15 +64,39 @@ async function executeBatchFill() {
             return;
         }
         // 正常提交流程
+        // $(".src-components-write-footer-index__submitBtn").click();
+        // let t = setInterval(() => {
+        //     const $confirmBtn = $(".ksapc-btn-middle.ksapc-btn-primary:contains(确 认)");
+        //     if ($confirmBtn.length) {
+        //         $confirmBtn.click();
+        //         clearInterval(t);
+        //     }
+        // }, 100);
+        // console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
+        // 正常提交流程
         $(".src-components-write-footer-index__submitBtn").click();
-        let t = setInterval(() => {
+
+        // 使用 MutationObserver 替代轮询
+        const observer = new MutationObserver((mutations, obs) => {
             const $confirmBtn = $(".ksapc-btn-middle.ksapc-btn-primary:contains(确 认)");
             if ($confirmBtn.length) {
                 $confirmBtn.click();
-                clearInterval(t);
+                console.log("✅ 确认按钮已自动点击");
+                obs.disconnect(); // 成功点击后停止监听
             }
-        }, 100);
-        console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
+        });
+
+        // 开始监听整个 body 的子节点变化
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // 设置一个保险：5秒后如果还没出现就自动停止监听，防止内存泄露
+        setTimeout(() => observer.disconnect(), 5000);
+
+        console.log(`🚀 任务完成：填充并触发提交（成功匹配 ${successCount} 个字段）`);
+
     }
 }
 async function createPanel() {
@@ -188,4 +212,4 @@ function doRealFill(title, value, type, isMock = false) {
     return isFound;
 }
 $(createPanel);
-// End-191-2026.04.27.105202
+// End-215-2026.04.27.111449
