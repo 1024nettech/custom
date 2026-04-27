@@ -111,7 +111,7 @@ async function createPanel() {
     // 【核心】如果开启了自动，且当前页面有题目，则直接运行
     if (isAuto) {
         console.log("检测到自动模式已开启，准备填充...");
-        setTimeout(executeBatchFill, 800); // 略微延迟确保表单渲染
+        setTimeout(executeBatchFill, 0); // 略微延迟确保表单渲染
     }
 }
 
@@ -163,4 +163,4 @@ function doRealFill(title, value, type) {
 }
 
 $(createPanel);
-// End-166-2026.04.27.084306
+// End-166-2026.04.27.085313
