@@ -4,7 +4,7 @@ import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.
 const FIELD_TYPE = { TEXTAREA: "textarea", RADIO: "radio" };
 const STORAGE_KEY_POS = "formSavePanelPosition";
 const STORAGE_KEY_AUTO = "formAutoSubmitState";
-const STORAGE_KEY_DELAY = "formAutoDelayTime"; // 新增：存储延迟时间
+const STORAGE_KEY_DELAY = "formAutoDelayTime";
 
 // 通用赋值逻辑
 function fillWpsInput(element, value) {
@@ -22,30 +22,31 @@ function fillWpsInput(element, value) {
     setTimeout(() => element.blur(), 20);
 }
 
-// 核心填充逻辑
-async function executeBatchFill0() {
-    const allFields = await entries();
-    const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO, STORAGE_KEY_DELAY];
-    const dataFields = allFields.filter(([key]) => !configKeys.includes(key));
+// 虚拟预览函数：在元素位置显示预填内容
+function previewFill(element, value) {
+    if (!element) return;
+    const $el = $(element);
+    // 移除同一个容器内的旧预览
+    $el.closest(".ksapc-questions-write-container").find(".fill-preview-span").remove();
 
-    let successCount = 0;
-    dataFields.forEach(([_, fieldData]) => {
-        if (fieldData.title && fieldData.value) {
-            const result = doRealFill(fieldData.title, fieldData.value, fieldData.type);
-            if (result) successCount++;
-        }
-    });
+    const $span = $(`<span class="fill-preview-span" style="
+        margin-left: 10px;
+        color: #ff9800;
+        font-weight: bold;
+        font-size: 13px;
+        background: #fff3e0;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #ffb74d;
+        display: inline-block;
+        vertical-align: middle;
+    ">预览: ${value}</span>`);
 
-    if (successCount > 0) {
-        $(".src-components-write-footer-index__submitBtn").click();
-        let t = setInterval(() => {
-            const $confirmBtn = $(".ksapc-btn-middle.ksapc-btn-primary:contains(确 认)");
-            if ($confirmBtn.length) {
-                $confirmBtn.click();
-                clearInterval(t);
-            }
-        }, 100);
-        console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
+    // 尝试插入到输入框后面，如果是 radio 则插入到文本后面
+    if ($el.is("input[type='radio']")) {
+        $el.closest(".ksapc-radio").append($span);
+    } else {
+        $el.after($span);
     }
 }
 
@@ -55,24 +56,24 @@ async function executeBatchFill() {
     const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO, STORAGE_KEY_DELAY];
     const dataFields = allFields.filter(([key]) => !configKeys.includes(key));
 
+    // 判断是否为模拟阶段（不开始收集）
+    const isMock = $("body").text().includes("当前暂未开始收集表单");
     let successCount = 0;
+
     dataFields.forEach(([_, fieldData]) => {
         if (fieldData.title && fieldData.value) {
-            const result = doRealFill(fieldData.title, fieldData.value, fieldData.type);
+            const result = doRealFill(fieldData.title, fieldData.value, fieldData.type, isMock);
             if (result) successCount++;
         }
     });
 
     if (successCount > 0) {
-        // 新增判断：如果页面包含“暂未开始收集”提示，则终止提交
-        const isNotStarted = $("body").text().includes("当前暂未开始收集表单");
-
-        if (isNotStarted) {
-            console.log(`⚠️ 页面显示“暂未开始收集”，已完成 ${successCount} 个字段填充，停止自动提交。`);
-            return; // 提前退出，不执行后续点击逻辑
+        if (isMock) {
+            console.log(`🛠️ 模拟模式：已完成 ${successCount} 个字段预览，不触发提交。`);
+            return;
         }
 
-        // 正常提交逻辑
+        // 正常提交流程
         $(".src-components-write-footer-index__submitBtn").click();
         let t = setInterval(() => {
             const $confirmBtn = $(".ksapc-btn-middle.ksapc-btn-primary:contains(确 认)");
@@ -85,12 +86,9 @@ async function executeBatchFill() {
     }
 }
 
-
-
-
 async function createPanel() {
     const isAuto = await get(STORAGE_KEY_AUTO) || false;
-    const delayTime = await get(STORAGE_KEY_DELAY) || 800; // 默认800ms
+    const delayTime = await get(STORAGE_KEY_DELAY) || 800;
 
     const html = `
             <style>
@@ -110,12 +108,10 @@ async function createPanel() {
                     <span>💾 一键保存填充</span>
                     <label class="auto-box"><input type="checkbox" id="autoTrigger" ${isAuto ? 'checked' : ''}>自动提交</label>
                 </div>
-                
                 <div class="config-row">
                     <span>自动触发延迟 (ms):</span>
                     <input type="number" id="delayInput" value="${delayTime}" step="100" min="0">
                 </div>
-
                 <input id="fieldTitle" type="text" placeholder="字段标题（姓名、学号）">
                 <input id="fieldValue" type="text" placeholder="要填入的值">
                 <select id="fieldType">
@@ -132,18 +128,15 @@ async function createPanel() {
     $("#formSavePanel").css(pos.right ? { right: pos.right, top: pos.top } : { left: pos.left, top: pos.top });
     initDrag($("#formSavePanel"), $("#dragHeader"));
 
-    // 保存延迟设置
     $("#delayInput").on("input", async function () {
         const val = parseInt($(this).val()) || 0;
         await set(STORAGE_KEY_DELAY, val);
     });
 
-    // 自动开关
     $("#autoTrigger").on("change", async function () {
         await set(STORAGE_KEY_AUTO, $(this).prop("checked"));
     });
 
-    // 手动执行
     $("#batchRealFillBtn").on("click", async () => {
         const title = $("#fieldTitle").val().trim();
         const value = $("#fieldValue").val().trim();
@@ -158,7 +151,6 @@ async function createPanel() {
         location.reload();
     });
 
-    // 自动触发逻辑
     if (isAuto) {
         console.log(`检测到自动模式，将在 ${delayTime}ms 后执行...`);
         setTimeout(executeBatchFill, delayTime);
@@ -191,7 +183,7 @@ function initDrag($element, $handle) {
     });
 }
 
-function doRealFill(title, value, type) {
+function doRealFill(title, value, type, isMock = false) {
     let isFound = false;
     $(".ksapc-questions-write-container").each(function () {
         const $container = $(this);
@@ -199,12 +191,16 @@ function doRealFill(title, value, type) {
         isFound = true;
         if (type === FIELD_TYPE.TEXTAREA) {
             let inputEl = $container.find("textarea")[0] || $container.find("input")[0];
-            if (inputEl) fillWpsInput(inputEl, value);
+            if (inputEl) {
+                isMock ? previewFill(inputEl, value) : fillWpsInput(inputEl, value);
+            }
         } else if (type === FIELD_TYPE.RADIO) {
             $container.find(".ant-radio-wrapper.ksapc-radio").each(function () {
                 if ($(this).text().includes(value)) {
                     const radioInput = $(this).find("input.ant-radio-input")[0];
-                    if (radioInput) radioInput.click();
+                    if (radioInput) {
+                        isMock ? previewFill(radioInput, value) : radioInput.click();
+                    }
                 }
             });
         }
@@ -213,4 +209,4 @@ function doRealFill(title, value, type) {
 }
 
 $(createPanel);
-// End-216-2026.04.27.103738
+// End-212-2026.04.27.104714
