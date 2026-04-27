@@ -1,11 +1,9 @@
 import { $ } from "/lib/js/modules/jquery.min.js";
 import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.min.js"
-
 const FIELD_TYPE = { TEXTAREA: "textarea", RADIO: "radio" };
 const STORAGE_KEY_POS = "formSavePanelPosition";
 const STORAGE_KEY_AUTO = "formAutoSubmitState";
 const STORAGE_KEY_DELAY = "formAutoDelayTime";
-
 // 通用赋值逻辑
 function fillWpsInput(element, value) {
     if (!element) return;
@@ -21,14 +19,12 @@ function fillWpsInput(element, value) {
     element.dispatchEvent(new Event("change", { bubbles: true }));
     setTimeout(() => element.blur(), 20);
 }
-
 // 虚拟预览函数：在元素位置显示预填内容
 function previewFill(element, value) {
     if (!element) return;
     const $el = $(element);
     // 移除同一个容器内的旧预览
     $el.closest(".ksapc-questions-write-container").find(".fill-preview-span").remove();
-
     const $span = $(`<span class="fill-preview-span" style="
         margin-left: 10px;
         color: #ff9800;
@@ -41,7 +37,6 @@ function previewFill(element, value) {
         display: inline-block;
         vertical-align: middle;
     ">预览: ${value}</span>`);
-
     // 尝试插入到输入框后面，如果是 radio 则插入到文本后面
     if ($el.is("input[type='radio']")) {
         $el.closest(".ksapc-radio").append($span);
@@ -49,30 +44,25 @@ function previewFill(element, value) {
         $el.after($span);
     }
 }
-
 // 核心填充逻辑
 async function executeBatchFill() {
     const allFields = await entries();
     const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO, STORAGE_KEY_DELAY];
     const dataFields = allFields.filter(([key]) => !configKeys.includes(key));
-
     // 判断是否为模拟阶段（不开始收集）
     const isMock = $("body").text().includes("当前暂未开始收集表单");
     let successCount = 0;
-
     dataFields.forEach(([_, fieldData]) => {
         if (fieldData.title && fieldData.value) {
             const result = doRealFill(fieldData.title, fieldData.value, fieldData.type, isMock);
             if (result) successCount++;
         }
     });
-
     if (successCount > 0) {
         if (isMock) {
             console.log(`🛠️ 模拟模式：已完成 ${successCount} 个字段预览，不触发提交。`);
             return;
         }
-
         // 正常提交流程
         $(".src-components-write-footer-index__submitBtn").click();
         let t = setInterval(() => {
@@ -85,11 +75,9 @@ async function executeBatchFill() {
         console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
     }
 }
-
 async function createPanel() {
     const isAuto = await get(STORAGE_KEY_AUTO) || false;
     const delayTime = await get(STORAGE_KEY_DELAY) || 800;
-
     const html = `
             <style>
                 #formSavePanel { padding: 14px; border-radius: 12px; position: fixed; width: 340px; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 99999999; font-family: 微软雅黑; }
@@ -123,20 +111,16 @@ async function createPanel() {
             </div>
         `;
     $("body").append(html);
-
     const pos = await get(STORAGE_KEY_POS) || { right: "50px", top: "84px" };
     $("#formSavePanel").css(pos.right ? { right: pos.right, top: pos.top } : { left: pos.left, top: pos.top });
     initDrag($("#formSavePanel"), $("#dragHeader"));
-
     $("#delayInput").on("input", async function () {
         const val = parseInt($(this).val()) || 0;
         await set(STORAGE_KEY_DELAY, val);
     });
-
     $("#autoTrigger").on("change", async function () {
         await set(STORAGE_KEY_AUTO, $(this).prop("checked"));
     });
-
     $("#batchRealFillBtn").on("click", async () => {
         const title = $("#fieldTitle").val().trim();
         const value = $("#fieldValue").val().trim();
@@ -144,19 +128,16 @@ async function createPanel() {
         if (title && value) await set(title, { title, value, type });
         executeBatchFill();
     });
-
     $("#clearAllBtn").on("click", async () => {
         if (!confirm("⚠️ 确定清除所有数据？")) return;
         await clear();
         location.reload();
     });
-
     if (isAuto) {
         console.log(`检测到自动模式，将在 ${delayTime}ms 后执行...`);
         setTimeout(executeBatchFill, delayTime);
     }
 }
-
 function initDrag($element, $handle) {
     let isDragging = false, startX, startY, initialLeft, initialTop, initialRight;
     $handle.on("mousedown", e => {
@@ -182,7 +163,6 @@ function initDrag($element, $handle) {
         isDragging = false;
     });
 }
-
 function doRealFill(title, value, type, isMock = false) {
     let isFound = false;
     $(".ksapc-questions-write-container").each(function () {
@@ -207,6 +187,5 @@ function doRealFill(title, value, type, isMock = false) {
     });
     return isFound;
 }
-
 $(createPanel);
-// End-212-2026.04.27.104714
+// End-191-2026.04.27.105202
