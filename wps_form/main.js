@@ -3,7 +3,8 @@ import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.
 
 const FIELD_TYPE = { TEXTAREA: "textarea", RADIO: "radio" };
 const STORAGE_KEY_POS = "formSavePanelPosition";
-const STORAGE_KEY_AUTO = "formAutoSubmitState"; // 新增：存储自动触发状态
+const STORAGE_KEY_AUTO = "formAutoSubmitState";
+const STORAGE_KEY_DELAY = "formAutoDelayTime"; // 新增：存储延迟时间
 
 // 通用赋值逻辑
 function fillWpsInput(element, value) {
@@ -24,12 +25,10 @@ function fillWpsInput(element, value) {
 // 核心填充逻辑
 async function executeBatchFill() {
     const allFields = await entries();
-    let successCount = 0;
-
-    // 排除掉配置类的 Key
-    const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO];
+    const configKeys = [STORAGE_KEY_POS, STORAGE_KEY_AUTO, STORAGE_KEY_DELAY];
     const dataFields = allFields.filter(([key]) => !configKeys.includes(key));
 
+    let successCount = 0;
     dataFields.forEach(([_, fieldData]) => {
         if (fieldData.title && fieldData.value) {
             const result = doRealFill(fieldData.title, fieldData.value, fieldData.type);
@@ -46,30 +45,39 @@ async function executeBatchFill() {
                 clearInterval(t);
             }
         }, 100);
-        console.log(`🚀 自动任务：填充并提交了 ${successCount} 个字段`);
+        console.log(`🚀 任务完成：填充并提交了 ${successCount} 个字段`);
     }
 }
 
 async function createPanel() {
     const isAuto = await get(STORAGE_KEY_AUTO) || false;
+    const delayTime = await get(STORAGE_KEY_DELAY) || 800; // 默认800ms
 
     const html = `
             <style>
                 #formSavePanel { padding: 14px; border-radius: 12px; position: fixed; width: 340px; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 99999999; font-family: 微软雅黑; }
                 #dragHeader { font-weight: bold; font-size: 16px; margin-bottom: 12px; cursor: move; display: flex; justify-content: space-between; align-items: center; }
-                #fieldTitle,#fieldValue,#fieldType { width: 100%; padding: 9px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
+                #fieldTitle,#fieldValue,#fieldType,#delayInput { width: 100%; padding: 9px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
                 #batchRealFillBtn,#clearAllBtn { width: 100%; padding: 10px; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 8px; }
                 #batchRealFillBtn { background: #28a745; }
                 #clearAllBtn { background: #dc3545; }
-                .auto-box { font-size: 12px; color: #666; font-weight: normal; cursor: pointer; display: flex; align-items: center; }
-                .auto-box input { margin-right: 4px; cursor: pointer; }
+                .config-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: #666; }
+                .auto-box { cursor: pointer; display: flex; align-items: center; }
+                .auto-box input { margin-right: 4px; }
+                #delayInput { width: 70px; margin-bottom: 0; padding: 4px 6px; }
             </style>
             <div id="formSavePanel">
                 <div id="dragHeader">
                     <span>💾 一键保存填充</span>
                     <label class="auto-box"><input type="checkbox" id="autoTrigger" ${isAuto ? 'checked' : ''}>自动提交</label>
                 </div>
-                <input id="fieldTitle" type="text" placeholder="字段标题（姓名、班级、学号）">
+                
+                <div class="config-row">
+                    <span>自动触发延迟 (ms):</span>
+                    <input type="number" id="delayInput" value="${delayTime}" step="100" min="0">
+                </div>
+
+                <input id="fieldTitle" type="text" placeholder="字段标题（姓名、学号）">
                 <input id="fieldValue" type="text" placeholder="要填入的值">
                 <select id="fieldType">
                     <option value="textarea">文本输入框</option>
@@ -81,19 +89,22 @@ async function createPanel() {
         `;
     $("body").append(html);
 
-    // 加载位置
     const pos = await get(STORAGE_KEY_POS) || { right: "50px", top: "84px" };
     $("#formSavePanel").css(pos.right ? { right: pos.right, top: pos.top } : { left: pos.left, top: pos.top });
     initDrag($("#formSavePanel"), $("#dragHeader"));
 
-    // 自动开关变更
-    $("#autoTrigger").on("change", async function () {
-        const status = $(this).prop("checked");
-        await set(STORAGE_KEY_AUTO, status);
-        console.log("自动模式已" + (status ? "开启" : "关闭"));
+    // 保存延迟设置
+    $("#delayInput").on("input", async function () {
+        const val = parseInt($(this).val()) || 0;
+        await set(STORAGE_KEY_DELAY, val);
     });
 
-    // 手动触发逻辑
+    // 自动开关
+    $("#autoTrigger").on("change", async function () {
+        await set(STORAGE_KEY_AUTO, $(this).prop("checked"));
+    });
+
+    // 手动执行
     $("#batchRealFillBtn").on("click", async () => {
         const title = $("#fieldTitle").val().trim();
         const value = $("#fieldValue").val().trim();
@@ -108,17 +119,17 @@ async function createPanel() {
         location.reload();
     });
 
-    // 【核心】如果开启了自动，且当前页面有题目，则直接运行
+    // 自动触发逻辑
     if (isAuto) {
-        console.log("检测到自动模式已开启，准备填充...");
-        setTimeout(executeBatchFill, 0); // 略微延迟确保表单渲染
+        console.log(`检测到自动模式，将在 ${delayTime}ms 后执行...`);
+        setTimeout(executeBatchFill, delayTime);
     }
 }
 
 function initDrag($element, $handle) {
     let isDragging = false, startX, startY, initialLeft, initialTop, initialRight;
     $handle.on("mousedown", e => {
-        if (e.target.id === "autoTrigger") return; // 防止点勾选框时触发拖拽
+        if ($(e.target).closest('.auto-box').length) return;
         isDragging = true;
         startX = e.clientX; startY = e.clientY;
         initialLeft = parseInt($element.css("left")) || null;
@@ -163,4 +174,4 @@ function doRealFill(title, value, type) {
 }
 
 $(createPanel);
-// End-166-2026.04.27.085313
+// End-177-2026.04.27.085900
