@@ -4,7 +4,7 @@ import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.
 // --- 核心填充函数 ---
 
 function smartFillInput(el, value) {
-    const input = $(el)[0];
+    const input = $(el);
     if (!input) return false;
     let elementProto = (input instanceof HTMLInputElement) ? HTMLInputElement.prototype :
         (input instanceof HTMLTextAreaElement) ? HTMLTextAreaElement.prototype : null;
@@ -35,7 +35,7 @@ function smartFillRadio($container, targetOptionText) {
     if (!$targetBtn) $targetBtn = $radioBtns.first();
     if ($targetBtn.attr('aria-checked') === 'true') return true;
     $targetBtn.focus();
-    $targetBtn[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    $targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     return true;
 }
 
@@ -53,26 +53,27 @@ function smartFillCheckbox($container, targetValue) {
         }
     });
     if (targetOptions.length === 0 && $container.find('div[role="checkbox"][aria-checked="true"]').length === 0) {
-        $checkboxes.first()[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        $checkboxes.first().dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
     return true;
 }
 
 const DB_KEY = 'form_auto_fill_data';
 const SUBMIT_CONF_KEY = 'form_submit_keywords';
+const AUTO_SUBMIT_SWITCH_KEY = 'form_auto_submit_enabled'; // 开关存储键
 
 async function startFilling() {
     const config = await get(DB_KEY) || {};
     const submitConfigRaw = await get(SUBMIT_CONF_KEY) || "下一步,提交,Submit,Next";
+    const autoSubmitEnabled = await get(AUTO_SUBMIT_SWITCH_KEY) ?? true; // 默认开启
     const actionKeywords = submitConfigRaw.split(/[,，]/).map(s => s.trim());
 
     const $questions = $('.geS5n');
-    let filledAny = false;
 
     // 1. 填充题目
     $questions.each(function () {
         const $question = $(this);
-        if ($question.data('auto-filled')) return; // 跳过已处理题目
+        if ($question.data('auto-filled')) return;
 
         const $titleEl = $question.find('.M7eMe, .HoXoMd');
         if (!$titleEl.length) return;
@@ -92,31 +93,33 @@ async function startFilling() {
                     smartFillCheckbox($question, targetValue);
                 }
                 $question.data('auto-filled', true);
-                filledAny = true;
             }
         }
     });
 
-    // 2. 查找并点击操作按钮 (下一步/提交)
-    setTimeout(() => {
-        const $btns = $('.uArJ5e[role="button"]');
-        let $targetBtn = null;
+    // 2. 自动跳转/提交逻辑 (仅在开关开启时执行)
+    if (autoSubmitEnabled) {
+        setTimeout(() => {
+            const $btns = $('.uArJ5e[role="button"]');
+            let $targetBtn = null;
 
-        $btns.each(function () {
-            const btnText = $(this).text().trim();
-            // 匹配关键词且排除“返回”按钮
-            if (actionKeywords.some(key => btnText.includes(key))) {
-                if (btnText.includes('返回') || btnText.includes('Back')) return;
-                $targetBtn = $(this);
-                return false;
+            $btns.each(function () {
+                const btnText = $(this).text().trim();
+                if (actionKeywords.some(key => btnText.includes(key))) {
+                    if (btnText.includes('返回') || btnText.includes('Back')) return;
+                    $targetBtn = $(this);
+                    return false;
+                }
+            });
+
+            if ($targetBtn && $targetBtn.length) {
+                console.log(`[自动操作] 开启自动提交，点击: "${$targetBtn.text().trim()}"`);
+                $targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
             }
-        });
-
-        if ($targetBtn && $targetBtn.length) {
-            console.log(`[自动操作] 匹配到按钮: "${$targetBtn.text().trim()}"，正在点击...`);
-            $targetBtn[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-        }
-    }, 300); // 给 300ms 缓冲，确保 Google 脚本捕获了所有 input change
+        }, 300);
+    } else {
+        console.log("[自动操作] 自动提交已关闭，仅填充内容。");
+    }
 }
 
 // --- UI 逻辑 ---
@@ -133,33 +136,39 @@ const initUI = async () => {
         .btn-save { background: #2563eb; color: white; }
         .btn-run { background: #10b981; color: white; width: 100%; margin-top: 5px; }
         .btn-clear { background: #f3f4f6; color: #374151; }
+        .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid #eee; margin-top: 5px; }
+        .switch-row label { font-size: 12px; font-weight: bold; color: #374151; }
         .data-preview { margin-top: 10px; font-size: 11px; color: #6b7280; background: #f9fafb; padding: 8px; border-radius: 4px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
     `).appendTo('head');
 
     const currentKeywords = await get(SUBMIT_CONF_KEY) || "下一步,提交";
+    const isAutoEnabled = await get(AUTO_SUBMIT_SWITCH_KEY) ?? true;
 
     const html = `
         <div id="auto-filler-panel">
-            <div class="panel-header">Form 抢填控制台 (多页优化版)</div>
+            <div class="panel-header">Form 抢填控制台</div>
             <div class="panel-body">
                 <div class="input-group"><label>题目关键字</label><input type="text" id="field-title"></div>
-                <div class="input-group"><label>元素类型</label>
+                <div class="input-group"><label>类型</label>
                     <select id="field-type">
                         <option value="text">文本输入框</option>
                         <option value="radio">单选框</option>
                         <option value="checkbox">复选框</option>
                     </select>
                 </div>
-                <div class="input-group"><label>预填内容 (多选逗号隔开)</label><input type="text" id="field-value"></div>
+                <div class="input-group"><label>预填内容</label><input type="text" id="field-value"></div>
                 <div class="btn-row">
                     <button id="btn-save" class="btn btn-save">保存题目</button>
-                    <button id="btn-clear" class="btn btn-clear">清空配置</button>
+                    <button id="btn-clear" class="btn btn-clear">清空</button>
                 </div>
-                <div class="input-group" style="border-top:1px solid #eee; padding-top:10px">
-                    <label>按钮关键字 (多个用逗号隔开)</label>
+                <div class="input-group" style="margin-top:5px"><label>按钮关键字</label>
                     <input type="text" id="submit-keywords" value="${currentKeywords}">
                 </div>
-                <button id="btn-run" class="btn btn-run">🚀 立即开始自动填充</button>
+                <div class="switch-row">
+                    <label>自动执行翻页/提交</label>
+                    <input type="checkbox" id="auto-submit-toggle" ${isAutoEnabled ? 'checked' : ''}>
+                </div>
+                <button id="btn-run" class="btn btn-run">🚀 开始手动触发填充</button>
                 <div id="preview" class="data-preview"></div>
             </div>
         </div>`;
@@ -180,13 +189,19 @@ const initUI = async () => {
         updatePreview();
     });
 
-    // 自动保存按钮配置
     $('#submit-keywords').on('input', async function () {
         await set(SUBMIT_CONF_KEY, $(this).val().trim());
     });
 
+    // 监听开关切换
+    $('#auto-submit-toggle').on('change', async function () {
+        const enabled = $(this).prop('checked');
+        await set(AUTO_SUBMIT_SWITCH_KEY, enabled);
+        console.log(`[设置] 自动提交已${enabled ? '开启' : '关闭'}`);
+    });
+
     $('#btn-clear').click(async () => {
-        if (confirm('清空题目配置？')) { await del(DB_KEY); updatePreview(); }
+        if (confirm('清空配置？')) { await del(DB_KEY); updatePreview(); }
     });
 
     $('#btn-run').click(startFilling);
@@ -195,19 +210,9 @@ const initUI = async () => {
 
 $(async function () {
     await initUI();
-    console.log("多页自动填表脚本已就绪...");
-
-    // 自动运行轮询：每100ms检查一次页面变化
     setInterval(async () => {
-        // 查找当前页面中尚未填充的题目
-        const $unfilled = $('.geS5n').filter(function () {
-            return !$(this).data('auto-filled');
-        });
-
-        if ($unfilled.length > 0) {
-            console.log("检测到新页面或未填充题目，正在执行...");
-            await startFilling();
-        }
+        const $unfilled = $('.geS5n').filter(function () { return !$(this).data('auto-filled'); });
+        if ($unfilled.length > 0) { await startFilling(); }
     }, 100);
 });
-// End-213-2026.05.02.224615
+// End-218-2026.05.02.225614
