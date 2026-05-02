@@ -1,87 +1,77 @@
-import { $ } from "/lib/js/modules/jquery.min.js";
-import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.min.js";
-
 // --- 核心填充函数 ---
-alert();
+
 function smartFillInput(el, value) {
-    const input = $(el)[0];
-    if (!input) return false;
-    let elementProto = (input instanceof HTMLInputElement) ? HTMLInputElement.prototype :
-        (input instanceof HTMLTextAreaElement) ? HTMLTextAreaElement.prototype : null;
+    if (!el) return false;
+    let elementProto = (el instanceof HTMLInputElement) ? HTMLInputElement.prototype :
+        (el instanceof HTMLTextAreaElement) ? HTMLTextAreaElement.prototype : null;
     if (!elementProto) return false;
+    
     const nativeSetter = Object.getOwnPropertyDescriptor(elementProto, "value").set;
     if (!nativeSetter) return false;
-    input.focus();
-    nativeSetter.call(input, value);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-    input.blur();
+    
+    el.focus();
+    nativeSetter.call(el, value);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    el.blur();
     return true;
 }
 
-function smartFillRadio($container, targetOptionText) {
-    const $radioBtns = $container.find('div[role="radio"]');
-    if (!$radioBtns.length) return false;
-    let $targetBtn = null;
+function smartFillRadio(container, targetOptionText) {
+    const radioBtns = container.querySelectorAll('div[role="radio"]');
+    if (!radioBtns.length) return false;
+    
+    let targetBtn = null;
     if (targetOptionText) {
-        $radioBtns.each(function () {
-            const $this = $(this);
-            if ($this.text().includes(targetOptionText) || $this.attr('aria-label')?.includes(targetOptionText) || $this.parent().text().includes(targetOptionText)) {
-                $targetBtn = $this;
-                return false;
+        for (const btn of radioBtns) {
+            const ariaLabel = btn.getAttribute('aria-label') || "";
+            if (btn.textContent.includes(targetOptionText) || ariaLabel.includes(targetOptionText) || btn.parentElement.textContent.includes(targetOptionText)) {
+                targetBtn = btn;
+                break;
             }
-        });
+        }
     }
-    if (!$targetBtn) $targetBtn = $radioBtns.first();
-    if ($targetBtn.attr('aria-checked') === 'true') return true;
-    $targetBtn.focus();
-    $targetBtn[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    
+    if (!targetBtn) targetBtn = radioBtns[0];
+    if (targetBtn.getAttribute('aria-checked') === 'true') return true;
+    
+    targetBtn.focus();
+    targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     return true;
 }
 
-/**
- * 复选框自动填充
- * @param {string} targetValue - 支持多选，例如 "选项A,选项B"
- */
-function smartFillCheckbox($container, targetValue) {
-    const $checkboxes = $container.find('div[role="checkbox"]');
-    if (!$checkboxes.length) return false;
+function smartFillCheckbox(container, targetValue) {
+    const checkboxes = container.querySelectorAll('div[role="checkbox"]');
+    if (!checkboxes.length) return false;
 
-    // 将预填内容按常见分隔符切分为数组
     const targetOptions = targetValue ? targetValue.split(/[,，|]/).map(s => s.trim()) : [];
 
-    $checkboxes.each(function () {
-        const $this = $(this);
-        const itemText = $this.text() || $this.attr('aria-label') || $this.parent().text();
-        const isChecked = $this.attr('aria-checked') === 'true';
-
-        // 匹配逻辑：如果选项文本在目标数组中
+    checkboxes.forEach(btn => {
+        const itemText = btn.textContent || btn.getAttribute('aria-label') || btn.parentElement.textContent;
+        const isChecked = btn.getAttribute('aria-checked') === 'true';
         const shouldBeChecked = targetOptions.some(opt => itemText.includes(opt));
 
-        // 只有在状态不一致时才触发点击（避免取消已选中的）
         if (shouldBeChecked !== isChecked) {
-            this.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
         }
     });
 
-    // 保底逻辑：如果没填要求且一个都没选，则勾选第一个
-    if (targetOptions.length === 0 && $container.find('div[role="checkbox"][aria-checked="true"]').length === 0) {
-        $checkboxes.first()[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    if (targetOptions.length === 0 && !container.querySelector('div[role="checkbox"][aria-checked="true"]')) {
+        checkboxes[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
     return true;
 }
 
 const DB_KEY = 'form_auto_fill_data';
 
-async function startFilling() {
-    const config = await get(DB_KEY) || {};
-    const $questions = $('.geS5n');
+function startFilling() {
+    const config = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+    const questions = document.querySelectorAll('.geS5n');
 
-    $questions.each(function () {
-        const $question = $(this);
-        const $titleEl = $question.find('.M7eMe, .HoXoMd');
-        if (!$titleEl.length) return;
-        const fullTitle = $titleEl.text().trim();
+    questions.forEach(question => {
+        const titleEl = question.querySelector('.M7eMe, .HoXoMd');
+        if (!titleEl) return;
+        const fullTitle = titleEl.textContent.trim();
 
         for (const [matchText, detail] of Object.entries(config)) {
             if (fullTitle.includes(matchText)) {
@@ -89,12 +79,12 @@ async function startFilling() {
                 const type = detail["类型"];
 
                 if (type === 'text') {
-                    const $input = $question.find('input[type="text"], textarea');
-                    if ($input.length) smartFillInput($input, targetValue);
+                    const input = question.querySelector('input[type="text"], textarea');
+                    if (input) smartFillInput(input, targetValue);
                 } else if (type === 'radio') {
-                    smartFillRadio($question, targetValue);
+                    smartFillRadio(question, targetValue);
                 } else if (type === 'checkbox') {
-                    smartFillCheckbox($question, targetValue);
+                    smartFillCheckbox(question, targetValue);
                 }
             }
         }
@@ -103,7 +93,8 @@ async function startFilling() {
 
 // --- UI 逻辑 ---
 const initUI = () => {
-    $('<style>').text(`
+    const style = document.createElement('style');
+    style.textContent = `
         #auto-filler-panel { position: fixed; top: 20px; right: 20px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 9999; font-family: sans-serif; border: 1px solid #e5e7eb; }
         .panel-header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 12px 15px; font-weight: bold; border-radius: 12px 12px 0 0; }
         .panel-body { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -114,58 +105,66 @@ const initUI = () => {
         .btn { flex: 1; padding: 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-save { background: #2563eb; color: white; }
         .btn-run { background: #10b981; color: white; width: 100%; margin-top: 5px; }
-        .btn-clear { background: #f3f4f6; color: #374151; }
-        .data-preview { margin-top: 10px; font-size: 11px; color: #6b7280; background: #f9fafb; padding: 8px; border-radius: 4px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
-    `).appendTo('head');
+        .btn-clear { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        .data-preview { margin-top: 10px; font-size: 11px; color: #6b7280; background: #f9fafb; padding: 8px; border-radius: 4px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; border: 1px inset #eee; }
+    `;
+    document.head.appendChild(style);
 
-    const html = `
-        <div id="auto-filler-panel">
-            <div class="panel-header">Form 抢填控制台</div>
-            <div class="panel-body">
-                <div class="input-group"><label>标题关键字</label><input type="text" id="field-title"></div>
-                <div class="input-group"><label>元素类型</label>
-                    <select id="field-type">
-                        <option value="text">文本输入框</option>
-                        <option value="radio">单选框</option>
-                        <option value="checkbox">复选框</option>
-                    </select>
-                </div>
-                <div class="input-group"><label>预填内容 (多选逗号隔开)</label><input type="text" id="field-value"></div>
-                <div class="btn-row">
-                    <button id="btn-save" class="btn btn-save">保存</button>
-                    <button id="btn-clear" class="btn btn-clear">清空</button>
-                </div>
-                <button id="btn-run" class="btn btn-run">🚀 立即开始自动填充</button>
-                <div id="preview" class="data-preview"></div>
+    const panel = document.createElement('div');
+    panel.id = 'auto-filler-panel';
+    panel.innerHTML = `
+        <div class="panel-header">Form 抢填控制台 (Native)</div>
+        <div class="panel-body">
+            <div class="input-group"><label>标题关键字</label><input type="text" id="field-title"></div>
+            <div class="input-group"><label>元素类型</label>
+                <select id="field-type">
+                    <option value="text">文本输入框</option>
+                    <option value="radio">单选框</option>
+                    <option value="checkbox">复选框</option>
+                </select>
             </div>
+            <div class="input-group"><label>预填内容 (多选逗号隔开)</label><input type="text" id="field-value"></div>
+            <div class="btn-row">
+                <button id="btn-save" class="btn btn-save">保存</button>
+                <button id="btn-clear" class="btn btn-clear">清空</button>
+            </div>
+            <button id="btn-run" class="btn btn-run">🚀 立即开始自动填充</button>
+            <div id="preview" class="data-preview"></div>
         </div>`;
+    document.body.appendChild(panel);
 
-    $('body').append(html);
-
-    const updatePreview = async () => {
-        const data = await get(DB_KEY) || {};
-        $('#preview').text(JSON.stringify(data, null, 2));
+    const updatePreview = () => {
+        const data = localStorage.getItem(DB_KEY) || '{}';
+        document.getElementById('preview').textContent = JSON.stringify(JSON.parse(data), null, 2);
     };
 
-    $('#btn-save').click(async () => {
-        const title = $('#field-title').val().trim();
+    document.getElementById('btn-save').addEventListener('click', () => {
+        const title = document.getElementById('field-title').value.trim();
         if (!title) return;
-        const data = await get(DB_KEY) || {};
-        data[title] = { "类型": $('#field-type').val(), "值": $('#field-value').val().trim() };
-        await set(DB_KEY, data);
+        const data = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+        data[title] = { 
+            "类型": document.getElementById('field-type').value, 
+            "值": document.getElementById('field-value').value.trim() 
+        };
+        localStorage.setItem(DB_KEY, JSON.stringify(data));
         updatePreview();
     });
 
-    $('#btn-clear').click(async () => {
-        if (confirm('清空？')) { await del(DB_KEY); updatePreview(); }
+    document.getElementById('btn-clear').addEventListener('click', () => {
+        if (confirm('确定清空所有配置吗？')) {
+            localStorage.removeItem(DB_KEY);
+            updatePreview();
+        }
     });
 
-    $('#btn-run').click(startFilling);
+    document.getElementById('btn-run').addEventListener('click', startFilling);
+    
     updatePreview();
 };
 
-$(function () {
-    // 这里的代码会在 DOM 加载完毕后执行
+// 兼容不同的加载时机
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUI);
+} else {
     initUI();
-});
-
+}
