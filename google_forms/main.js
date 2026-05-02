@@ -39,32 +39,19 @@ function smartFillRadio($container, targetOptionText) {
     return true;
 }
 
-/**
- * 复选框自动填充
- * @param {string} targetValue - 支持多选，例如 "选项A,选项B"
- */
 function smartFillCheckbox($container, targetValue) {
     const $checkboxes = $container.find('div[role="checkbox"]');
     if (!$checkboxes.length) return false;
-
-    // 将预填内容按常见分隔符切分为数组
     const targetOptions = targetValue ? targetValue.split(/[,，|]/).map(s => s.trim()) : [];
-
     $checkboxes.each(function () {
         const $this = $(this);
         const itemText = $this.text() || $this.attr('aria-label') || $this.parent().text();
         const isChecked = $this.attr('aria-checked') === 'true';
-
-        // 匹配逻辑：如果选项文本在目标数组中
         const shouldBeChecked = targetOptions.some(opt => itemText.includes(opt));
-
-        // 只有在状态不一致时才触发点击（避免取消已选中的）
         if (shouldBeChecked !== isChecked) {
             this.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
         }
     });
-
-    // 保底逻辑：如果没填要求且一个都没选，则勾选第一个
     if (targetOptions.length === 0 && $container.find('div[role="checkbox"][aria-checked="true"]').length === 0) {
         $checkboxes.first()[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
@@ -72,13 +59,21 @@ function smartFillCheckbox($container, targetValue) {
 }
 
 const DB_KEY = 'form_auto_fill_data';
+const SUBMIT_CONF_KEY = 'form_submit_keywords';
 
 async function startFilling() {
     const config = await get(DB_KEY) || {};
-    const $questions = $('.geS5n');
+    const submitConfigRaw = await get(SUBMIT_CONF_KEY) || "下一步,提交,Submit,Next";
+    const actionKeywords = submitConfigRaw.split(/[,，]/).map(s => s.trim());
 
+    const $questions = $('.geS5n');
+    let filledAny = false;
+
+    // 1. 填充题目
     $questions.each(function () {
         const $question = $(this);
+        if ($question.data('auto-filled')) return; // 跳过已处理题目
+
         const $titleEl = $question.find('.M7eMe, .HoXoMd');
         if (!$titleEl.length) return;
         const fullTitle = $titleEl.text().trim();
@@ -96,13 +91,36 @@ async function startFilling() {
                 } else if (type === 'checkbox') {
                     smartFillCheckbox($question, targetValue);
                 }
+                $question.data('auto-filled', true);
+                filledAny = true;
             }
         }
     });
+
+    // 2. 查找并点击操作按钮 (下一步/提交)
+    setTimeout(() => {
+        const $btns = $('.uArJ5e[role="button"]');
+        let $targetBtn = null;
+
+        $btns.each(function () {
+            const btnText = $(this).text().trim();
+            // 匹配关键词且排除“返回”按钮
+            if (actionKeywords.some(key => btnText.includes(key))) {
+                if (btnText.includes('返回') || btnText.includes('Back')) return;
+                $targetBtn = $(this);
+                return false;
+            }
+        });
+
+        if ($targetBtn && $targetBtn.length) {
+            console.log(`[自动操作] 匹配到按钮: "${$targetBtn.text().trim()}"，正在点击...`);
+            $targetBtn[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        }
+    }, 300); // 给 300ms 缓冲，确保 Google 脚本捕获了所有 input change
 }
 
 // --- UI 逻辑 ---
-const initUI = () => {
+const initUI = async () => {
     $('<style>').text(`
         #auto-filler-panel { position: fixed; top: 20px; right: 20px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 9999; font-family: sans-serif; border: 1px solid #e5e7eb; }
         .panel-header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 12px 15px; font-weight: bold; border-radius: 12px 12px 0 0; }
@@ -118,11 +136,13 @@ const initUI = () => {
         .data-preview { margin-top: 10px; font-size: 11px; color: #6b7280; background: #f9fafb; padding: 8px; border-radius: 4px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; }
     `).appendTo('head');
 
+    const currentKeywords = await get(SUBMIT_CONF_KEY) || "下一步,提交";
+
     const html = `
         <div id="auto-filler-panel">
-            <div class="panel-header">Form 抢填控制台</div>
+            <div class="panel-header">Form 抢填控制台 (多页优化版)</div>
             <div class="panel-body">
-                <div class="input-group"><label>标题关键字</label><input type="text" id="field-title"></div>
+                <div class="input-group"><label>题目关键字</label><input type="text" id="field-title"></div>
                 <div class="input-group"><label>元素类型</label>
                     <select id="field-type">
                         <option value="text">文本输入框</option>
@@ -132,8 +152,12 @@ const initUI = () => {
                 </div>
                 <div class="input-group"><label>预填内容 (多选逗号隔开)</label><input type="text" id="field-value"></div>
                 <div class="btn-row">
-                    <button id="btn-save" class="btn btn-save">保存</button>
-                    <button id="btn-clear" class="btn btn-clear">清空</button>
+                    <button id="btn-save" class="btn btn-save">保存题目</button>
+                    <button id="btn-clear" class="btn btn-clear">清空配置</button>
+                </div>
+                <div class="input-group" style="border-top:1px solid #eee; padding-top:10px">
+                    <label>按钮关键字 (多个用逗号隔开)</label>
+                    <input type="text" id="submit-keywords" value="${currentKeywords}">
                 </div>
                 <button id="btn-run" class="btn btn-run">🚀 立即开始自动填充</button>
                 <div id="preview" class="data-preview"></div>
@@ -156,8 +180,13 @@ const initUI = () => {
         updatePreview();
     });
 
+    // 自动保存按钮配置
+    $('#submit-keywords').on('input', async function () {
+        await set(SUBMIT_CONF_KEY, $(this).val().trim());
+    });
+
     $('#btn-clear').click(async () => {
-        if (confirm('清空？')) { await del(DB_KEY); updatePreview(); }
+        if (confirm('清空题目配置？')) { await del(DB_KEY); updatePreview(); }
     });
 
     $('#btn-run').click(startFilling);
@@ -165,28 +194,20 @@ const initUI = () => {
 };
 
 $(async function () {
-    // 1. 初始化 UI 面板
-    initUI();
+    await initUI();
+    console.log("多页自动填表脚本已就绪...");
 
-    // 2. 核心：页面加载后立即尝试自动填充
-    // 考虑到 Google Forms 题目可能是异步渲染的，建议稍微延迟一点执行
-    console.log("检测到页面刷新，准备自动填充...");
+    // 自动运行轮询：每100ms检查一次页面变化
+    setInterval(async () => {
+        // 查找当前页面中尚未填充的题目
+        const $unfilled = $('.geS5n').filter(function () {
+            return !$(this).data('auto-filled');
+        });
 
-    // 方案 A：立即执行一次
-    await startFilling();
-
-    // 方案 B（推荐）：针对 Google Forms 渲染较慢的情况，进行轮询检测
-    // 如果发现页面还没加载出题目，就每隔 500ms 尝试一次，直到填充成功或尝试 10 次
-    let retryCount = 0;
-    const autoRunInterval = setInterval(async () => {
-        const $questions = $('.geS5n');
-        if ($questions.length > 0) {
-            console.log("检测到题目已加载，开始执行填充...");
+        if ($unfilled.length > 0) {
+            console.log("检测到新页面或未填充题目，正在执行...");
             await startFilling();
-            clearInterval(autoRunInterval); // 填充完就停止检测
         }
-
-        retryCount++;
-        if (retryCount > 10) clearInterval(autoRunInterval); // 最多等 5 秒
-    }, 10);
+    }, 100);
 });
+// End-213-2026.05.02.224615
