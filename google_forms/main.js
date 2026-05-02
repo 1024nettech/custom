@@ -164,8 +164,29 @@ const initUI = () => {
     updatePreview();
 };
 
-$(function () {
-    // 这里的代码会在 DOM 加载完毕后执行
+$(async function () {
+    // 1. 初始化 UI 面板
     initUI();
-});
 
+    // 2. 核心：页面加载后立即尝试自动填充
+    // 考虑到 Google Forms 题目可能是异步渲染的，建议稍微延迟一点执行
+    console.log("检测到页面刷新，准备自动填充...");
+
+    // 方案 A：立即执行一次
+    await startFilling();
+
+    // 方案 B（推荐）：针对 Google Forms 渲染较慢的情况，进行轮询检测
+    // 如果发现页面还没加载出题目，就每隔 500ms 尝试一次，直到填充成功或尝试 10 次
+    let retryCount = 0;
+    const autoRunInterval = setInterval(async () => {
+        const $questions = $('.geS5n');
+        if ($questions.length > 0) {
+            console.log("检测到题目已加载，开始执行填充...");
+            await startFilling();
+            clearInterval(autoRunInterval); // 填充完就停止检测
+        }
+
+        retryCount++;
+        if (retryCount > 10) clearInterval(autoRunInterval); // 最多等 5 秒
+    }, 10);
+});
