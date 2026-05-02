@@ -2,7 +2,7 @@ import { $ } from "/lib/js/modules/jquery.min.js";
 import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.min.js";
 
 // --- 核心填充函数 ---
-
+alert();
 function smartFillInput(el, value) {
     const input = $(el)[0];
     if (!input) return false;
