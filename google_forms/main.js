@@ -164,4 +164,8 @@ const initUI = () => {
     updatePreview();
 };
 
-initUI();
+$(function () {
+    // 这里的代码会在 DOM 加载完毕后执行
+    initUI();
+});
+
