@@ -4,7 +4,7 @@ import { set, get, del, keys, entries, clear } from "/lib/js/modules/idb-keyval.
 // --- 核心填充函数 ---
 
 function smartFillInput(el, value) {
-    const input = $(el);
+    const input = $(el)[0]; // 确保是原生节点
     if (!input) return false;
     let elementProto = (input instanceof HTMLInputElement) ? HTMLInputElement.prototype :
         (input instanceof HTMLTextAreaElement) ? HTMLTextAreaElement.prototype : null;
@@ -33,9 +33,13 @@ function smartFillRadio($container, targetOptionText) {
         });
     }
     if (!$targetBtn) $targetBtn = $radioBtns.first();
-    if ($targetBtn.attr('aria-checked') === 'true') return true;
-    $targetBtn.focus();
-    $targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+    const nativeBtn = $targetBtn[0]; // 关键修复：转换为原生节点
+    if (!nativeBtn) return false;
+    if (nativeBtn.getAttribute('aria-checked') === 'true') return true;
+
+    nativeBtn.focus();
+    nativeBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     return true;
 }
 
@@ -43,34 +47,39 @@ function smartFillCheckbox($container, targetValue) {
     const $checkboxes = $container.find('div[role="checkbox"]');
     if (!$checkboxes.length) return false;
     const targetOptions = targetValue ? targetValue.split(/[,，|]/).map(s => s.trim()) : [];
+
     $checkboxes.each(function () {
-        const $this = $(this);
+        const nativeCb = this; // jQuery .each 中 this 就是原生节点
+        const $this = $(nativeCb);
         const itemText = $this.text() || $this.attr('aria-label') || $this.parent().text();
         const isChecked = $this.attr('aria-checked') === 'true';
         const shouldBeChecked = targetOptions.some(opt => itemText.includes(opt));
+
         if (shouldBeChecked !== isChecked) {
-            this.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+            nativeCb.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
         }
     });
+
+    // 保底：一个都没选则勾选第一个
     if (targetOptions.length === 0 && $container.find('div[role="checkbox"][aria-checked="true"]').length === 0) {
-        $checkboxes.first().dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        const firstNative = $checkboxes[0];
+        if (firstNative) firstNative.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
     return true;
 }
 
 const DB_KEY = 'form_auto_fill_data';
 const SUBMIT_CONF_KEY = 'form_submit_keywords';
-const AUTO_SUBMIT_SWITCH_KEY = 'form_auto_submit_enabled'; // 开关存储键
+const AUTO_SUBMIT_SWITCH_KEY = 'form_auto_submit_enabled';
 
 async function startFilling() {
     const config = await get(DB_KEY) || {};
     const submitConfigRaw = await get(SUBMIT_CONF_KEY) || "下一步,提交,Submit,Next";
-    const autoSubmitEnabled = await get(AUTO_SUBMIT_SWITCH_KEY) ?? true; // 默认开启
+    const autoSubmitEnabled = await get(AUTO_SUBMIT_SWITCH_KEY) ?? true;
     const actionKeywords = submitConfigRaw.split(/[,，]/).map(s => s.trim());
 
     const $questions = $('.geS5n');
 
-    // 1. 填充题目
     $questions.each(function () {
         const $question = $(this);
         if ($question.data('auto-filled')) return;
@@ -97,32 +106,29 @@ async function startFilling() {
         }
     });
 
-    // 2. 自动跳转/提交逻辑 (仅在开关开启时执行)
     if (autoSubmitEnabled) {
         setTimeout(() => {
             const $btns = $('.uArJ5e[role="button"]');
-            let $targetBtn = null;
+            let nativeTargetBtn = null;
 
             $btns.each(function () {
                 const btnText = $(this).text().trim();
                 if (actionKeywords.some(key => btnText.includes(key))) {
                     if (btnText.includes('返回') || btnText.includes('Back')) return;
-                    $targetBtn = $(this);
+                    nativeTargetBtn = this; // 获取原生节点
                     return false;
                 }
             });
 
-            if ($targetBtn && $targetBtn.length) {
-                console.log(`[自动操作] 开启自动提交，点击: "${$targetBtn.text().trim()}"`);
-                $targetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+            if (nativeTargetBtn) {
+                console.log(`[自动操作] 匹配到按钮: "${$(nativeTargetBtn).text().trim()}"`);
+                nativeTargetBtn.focus();
+                nativeTargetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
             }
         }, 300);
-    } else {
-        console.log("[自动操作] 自动提交已关闭，仅填充内容。");
     }
 }
 
-// --- UI 逻辑 ---
 const initUI = async () => {
     $('<style>').text(`
         #auto-filler-panel { position: fixed; top: 20px; right: 20px; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 9999; font-family: sans-serif; border: 1px solid #e5e7eb; }
@@ -146,7 +152,7 @@ const initUI = async () => {
 
     const html = `
         <div id="auto-filler-panel">
-            <div class="panel-header">Form 抢填控制台</div>
+            <div class="panel-header">Form 抢填控制台 (Fixed)</div>
             <div class="panel-body">
                 <div class="input-group"><label>题目关键字</label><input type="text" id="field-title"></div>
                 <div class="input-group"><label>类型</label>
@@ -161,14 +167,14 @@ const initUI = async () => {
                     <button id="btn-save" class="btn btn-save">保存题目</button>
                     <button id="btn-clear" class="btn btn-clear">清空</button>
                 </div>
-                <div class="input-group" style="margin-top:5px"><label>按钮关键字</label>
+                <div class="input-group" style="margin-top:5px"><label>按钮关键字 (逗号隔开)</label>
                     <input type="text" id="submit-keywords" value="${currentKeywords}">
                 </div>
                 <div class="switch-row">
-                    <label>自动执行翻页/提交</label>
+                    <label>自动翻页/提交</label>
                     <input type="checkbox" id="auto-submit-toggle" ${isAutoEnabled ? 'checked' : ''}>
                 </div>
-                <button id="btn-run" class="btn btn-run">🚀 开始手动触发填充</button>
+                <button id="btn-run" class="btn btn-run">🚀 手动触发填充并尝试跳转</button>
                 <div id="preview" class="data-preview"></div>
             </div>
         </div>`;
@@ -193,11 +199,8 @@ const initUI = async () => {
         await set(SUBMIT_CONF_KEY, $(this).val().trim());
     });
 
-    // 监听开关切换
     $('#auto-submit-toggle').on('change', async function () {
-        const enabled = $(this).prop('checked');
-        await set(AUTO_SUBMIT_SWITCH_KEY, enabled);
-        console.log(`[设置] 自动提交已${enabled ? '开启' : '关闭'}`);
+        await set(AUTO_SUBMIT_SWITCH_KEY, $(this).prop('checked'));
     });
 
     $('#btn-clear').click(async () => {
@@ -215,4 +218,4 @@ $(async function () {
         if ($unfilled.length > 0) { await startFilling(); }
     }, 100);
 });
-// End-218-2026.05.02.225614
+// End-221-2026.05.02.230917
