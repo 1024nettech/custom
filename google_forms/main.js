@@ -134,7 +134,7 @@ async function startFilling() {
             setTimeout(() => {
                 nativeTargetBtn.focus();
                 nativeTargetBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-            }, 300);
+            }, 100);
         }
     }
     isProcessing = false;
@@ -289,6 +289,6 @@ $(async function () {
         if ($unfilled.length > 0) {
             await startFilling();
         }
-    }, 200);
+    }, 100);
 });
-// End-294-2026.05.03.100255
+// End-294-2026.05.03.100806
