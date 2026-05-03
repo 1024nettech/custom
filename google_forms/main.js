@@ -204,29 +204,53 @@ const initUI = async () => {
     };
 
     // --- 拖拽实现 ---
-    const header = $panel.find('.panel-header')[0];
+    // --- 拖拽实现 (修复版) ---
+    const header = $panel.find('.panel-header')[0]; // 获取原生节点
+    const panelEl = $panel[0];
+
     header.onmousedown = (e) => {
-        let shiftX = e.clientX - $panel[0].getBoundingClientRect().left;
-        let shiftY = e.clientY - $panel[0].getBoundingClientRect().top;
+        // 屏蔽右键点击引发的位移
+        if (e.button === 2) return;
+
+        // 计算鼠标相对于面板左上角的偏移
+        const rect = panelEl.getBoundingClientRect();
+        let shiftX = e.clientX - rect.left;
+        let shiftY = e.clientY - rect.top;
+
+        // 设置为绝对定位并取消 right 约束，防止坐标冲突
+        panelEl.style.right = 'auto';
+        panelEl.style.bottom = 'auto';
 
         function moveAt(pageX, pageY) {
-            $panel.css({
-                left: (pageX - shiftX) + 'px',
-                top: (pageY - shiftY) + 'px',
-                right: 'auto'
-            });
+            // 使用 pageX 考虑滚动位移，减去初始偏移量
+            panelEl.style.left = (pageX - shiftX) + 'px';
+            panelEl.style.top = (pageY - shiftY) + 'px';
         }
 
-        function onMouseMove(event) { moveAt(event.pageX, event.pageY); }
+        function onMouseMove(event) {
+            moveAt(event.pageX, event.pageY);
+        }
 
+        // 监听整个文档，防止鼠标移动过快脱离 header
         document.addEventListener('mousemove', onMouseMove);
+
         document.onmouseup = async () => {
             document.removeEventListener('mousemove', onMouseMove);
             document.onmouseup = null;
-            await set(PANEL_POS_KEY, { top: $panel.css('top'), left: $panel.css('left'), right: 'auto' });
+            // 持久化保存
+            await set(PANEL_POS_KEY, {
+                top: panelEl.style.top,
+                left: panelEl.style.left,
+                right: 'auto'
+            });
         };
     };
+
+    // 禁用系统原生拖拽效果干扰
     header.ondragstart = () => false;
+    // 阻止 header 上的右键菜单触发位移异常
+    header.oncontextmenu = (e) => { e.stopPropagation(); };
+
 
     // --- 事件绑定 ---
     $('#btn-save').click(async () => {
@@ -267,4 +291,4 @@ $(async function () {
         }
     }, 200);
 });
-// End-270-2026.05.03.094257
+// End-294-2026.05.03.100255
