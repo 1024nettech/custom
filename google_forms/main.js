@@ -155,24 +155,151 @@ const initUI = async () => {
     const submitDelay = await get(SUBMIT_DELAY_KEY) || 100;
 
     $('<style>').text(`
-        #auto-filler-panel { position: fixed; width: 300px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 99999; font-family: system-ui, -apple-system, sans-serif; border: 1px solid #e5e7eb; user-select: none; }
-        .panel-header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 12px 15px; font-weight: bold; border-radius: 12px 12px 0 0; cursor: move; font-size: 14px; }
-        .panel-body { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase; }
-        .input-group input, .input-group select { border: 1px solid #d1d5db; padding: 7px; border-radius: 6px; font-size: 13px; outline: none; transition: border 0.2s; }
-        .input-group input:focus { border-color: #3b82f6; }
-        .timer-row { display: flex; gap: 10px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
-        .timer-row .input-group { flex: 1; }
-        .btn-row { display: flex; gap: 8px; margin-top: 5px; }
-        .btn { flex: 1; padding: 9px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        #auto-filler-panel { 
+            position: fixed; 
+            width: 300px; 
+            background: #ffffff; 
+            border-radius: 12px; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2); 
+            z-index: 999999; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            border: 1px solid #e5e7eb; 
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        .panel-header { 
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); 
+            color: white; 
+            padding: 14px 15px; 
+            font-weight: bold; 
+            font-size: 14px;
+            cursor: move; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-body { 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            box-sizing: border-box;
+        }
+
+        .input-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+            width: 100%;
+            box-sizing: border-box; 
+        }
+
+        .input-group label { 
+            font-size: 11px; 
+            color: #6b7280; 
+            font-weight: 700; 
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .input-group input, .input-group select { 
+            border: 1px solid #d1d5db; 
+            padding: 8px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            outline: none; 
+            width: 100%;             /* 核心修复：占据100%父容器宽度 */
+            box-sizing: border-box;  /* 核心修复：确保padding不撑开宽度 */
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group input:focus { 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); 
+        }
+
+        /* 左右排列的定时器行 */
+        .timer-row { 
+            display: flex; 
+            gap: 10px; 
+            width: 100%; 
+            box-sizing: border-box;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 10px;
+        }
+        
+        .timer-row .input-group { 
+            flex: 1; /* 两个输入框平分 */
+        }
+
+        .btn-row { 
+            display: flex; 
+            gap: 8px; 
+        }
+
+        .btn { 
+            flex: 1; 
+            padding: 10px; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: bold; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .btn:active { transform: scale(0.95); }
+
         .btn-save { background: #2563eb; color: white; }
-        .btn-run { background: #10b981; color: white; width: 100%; margin-top: 5px; font-size: 13px; }
-        .btn-clear { background: #f3f4f6; color: #374151; }
-        .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid #f3f4f6; margin-top: 5px; }
+        .btn-save:hover { background: #1d4ed8; }
+
+        .btn-clear { background: #f3f4f6; color: #4b5563; }
+        .btn-clear:hover { background: #e5e7eb; }
+
+        .btn-run { 
+            background: #059669; 
+            color: white; 
+            width: 100%; 
+            margin-top: 4px;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+        .btn-run:hover { background: #047857; }
+
+        .switch-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 10px 0; 
+            border-top: 1px solid #f3f4f6;
+            margin-top: 2px;
+        }
+        
         .switch-row label { font-size: 12px; font-weight: 600; color: #374151; }
-        .data-preview { margin-top: 10px; font-size: 11px; color: #6b7280; background: #f9fafb; padding: 8px; border-radius: 6px; max-height: 80px; overflow-y: auto; white-space: pre-wrap; font-family: 'SFMono-Regular', Consolas, monospace; border: 1px inset #eee; }
+        
+        /* 自定义美化 checkbox 开关 (可选) */
+        #auto-submit-toggle { width: 16px; height: 16px; cursor: pointer; }
+
+        .data-preview { 
+            margin-top: 5px; 
+            font-size: 11px; 
+            color: #4b5563; 
+            background: #f9fafb; 
+            padding: 10px; 
+            border-radius: 6px; 
+            max-height: 100px; 
+            overflow-y: auto; 
+            white-space: pre-wrap; 
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; 
+            border: 1px solid #eee;
+        }
+
+        /* 滚动条美化 */
+        .data-preview::-webkit-scrollbar { width: 4px; }
+        .data-preview::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
     `).appendTo('head');
 
     const html = `
@@ -276,27 +403,23 @@ const initUI = async () => {
     $('#btn-run').click(startFilling);
 
     // --- 拖拽实现 ---
+    // 2. 交互修复：精确的拖拽计算
     const header = $panel.find('.panel-header')[0];
     header.onmousedown = (e) => {
-        if (e.button === 2) return;
         const rect = $panel[0].getBoundingClientRect();
-        let shiftX = e.clientX - rect.left;
-        let shiftY = e.clientY - rect.top;
-
-        $panel.css({ right: 'auto', bottom: 'auto' });
+        // 关键点：记录鼠标按下时的相对位置
+        const shiftX = e.clientX - rect.left;
+        const shiftY = e.clientY - rect.top;
 
         const onMouseMove = (ev) => {
-            $panel.css({ left: ev.pageX - shiftX + 'px', top: ev.pageY - shiftY + 'px' });
+            // 使用客户端坐标移动
+            $panel.css({ left: (ev.clientX - shiftX) + 'px', top: (ev.clientY - shiftY) + 'px', right: 'auto' });
         };
 
         $(document).on('mousemove', onMouseMove);
-        $(document).one('mouseup', async () => {
+        $(document).one('mouseup', () => {
             $(document).off('mousemove', onMouseMove);
-            await set(PANEL_POS_KEY, {
-                top: $panel.css('top'),
-                left: $panel.css('left'),
-                right: 'auto'
-            });
+            set(PANEL_POS_KEY, { top: $panel.css('top'), left: $panel.css('left'), right: 'auto' });
         });
     };
 
@@ -308,4 +431,4 @@ const initUI = async () => {
 
 // 入口
 $(initUI);
-// End-311-2026.05.03.103447
+// End-434-2026.05.03.104619
