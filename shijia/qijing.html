@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>表格自动合并</title>
+        <!-- 引入 Tailwind CSS 和 jQuery -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/4.0.0/jquery.min.js"></script>
+        <!-- 引入强大的 ExcelJS 库，完美支持保留原始样式 -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+        <!-- 引入 html2pdf 库以支持将页面或生成的日志 DOM 完美转换为 PDF -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    </head>
+    <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+        <div
+            class="container mx-auto max-w-4xl p-6 mt-10 bg-white rounded-xl shadow-md border border-slate-100"
+        >
+            <h1 class="text-2xl font-bold text-slate-700 mb-6 text-center border-b pb-4">
+                📊 启境GT7帖子审核-表格自动合并工具
+            </h1>
+
+            <!-- 参数配置区 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1"
+                        >要处理的列名 (例如: M)</label
+                    >
+                    <input
+                        type="text"
+                        id="targetColumn"
+                        value="M"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1"
+                        >起始行号 (包含此行)</label
+                    >
+                    <input
+                        type="number"
+                        id="startRow"
+                        value="3"
+                        min="1"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+            </div>
+
+            <!-- 文件上传与处理区 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 hover:bg-slate-100 transition"
+                >
+                    <span class="text-sm font-medium text-slate-600 mb-2"
+                        >📁 上传Alice宝宝的基础表 (Excel 1)</span
+                    >
+                    <input
+                        type="file"
+                        id="uploadExcel1"
+                        accept=".xlsx"
+                        class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                </div>
+                <div
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 hover:bg-slate-100 transition"
+                >
+                    <span class="text-sm font-medium text-slate-600 mb-2"
+                        >📁 上传Alice小伙伴的补充表 (Excel 2)</span
+                    >
+                    <input
+                        type="file"
+                        id="uploadExcel2"
+                        accept=".xlsx"
+                        class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                    />
+                </div>
+            </div>
+
+            <!-- 动作操作按钮 -->
+            <div class="flex gap-4">
+                <button
+                    id="btnProcess"
+                    class="flex-1 bg-blue-600 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:bg-blue-700 active:scale-[0.98] transition"
+                >
+                    ⚡ 执行合并分析
+                </button>
+                <button
+                    id="btnDownload"
+                    disabled
+                    class="flex-1 bg-slate-300 text-slate-500 font-medium py-3 px-4 rounded-xl shadow-md cursor-not-allowed transition"
+                >
+                    📥 下载合并后的 Excel 1
+                </button>
+            </div>
+        </div>
+        <!-- 爱情诗句展示区 -->
+        <div
+            class="container mx-auto max-w-4xl p-5 my-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl shadow border border-rose-100 text-center"
+        >
+            <p
+                id="lovePoem"
+                class="text-base font-medium text-rose-700 italic tracking-wide transition-all duration-500 opacity-100"
+            >
+                “ 正在为你采撷世间温柔... ”
+            </p>
+            <button
+                id="btnRefreshPoem"
+                class="mt-2 text-xs font-semibold text-rose-400 hover:text-rose-600 active:scale-95 transition"
+            >
+                ✨ 换一句缘分
+            </button>
+        </div>
+
+        <!-- 底部状态与日志提示区 -->
+        <div
+            class="container mx-auto max-w-4xl p-4 my-6 bg-slate-900 text-slate-200 rounded-xl shadow-lg border border-slate-800"
+        >
+            <h3
+                class="text-sm font-semibold tracking-wider text-slate-400 mb-2 uppercase flex items-center gap-2"
+            >
+                <span class="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                状态报告区
+            </h3>
+            <div
+                id="statusReport"
+                class="text-xs font-mono max-h-40 overflow-y-auto space-y-1 text-slate-300 bg-slate-950 p-3 rounded border border-slate-800"
+            >
+                等待上传文件并点击“执行合并分析”...
+            </div>
+        </div>
+
+        <script>
+            $(document).ready(function () {
+                let workbook1 = null;
+                let file1Name = 'merged_excel.xlsx';
+                let capturedLogs = [];
+                // 新增：用于动态存储用户实际上传的真实文件名
+                let actualFile1Name = 'Excel 1 基础表';
+                let actualFile2Name = 'Excel 2 补充表';
+
+                // 执行合并逻辑
+                $('#btnProcess').click(async function () {
+                    const file1 = $('#uploadExcel1')[0].files[0];
+                    const file2 = $('#uploadExcel2')[0].files[0];
+                    const colName = $('#targetColumn').val().trim().toUpperCase();
+                    const startRow = parseInt($('#startRow').val()) || 1;
+
+                    if (!file1 || !file2) {
+                        alert('请同时上传 Excel 1 和 Excel 2！');
+                        return;
+                    }
+                    // 新增：动态截取存储文件的真实名字，剔除硬编码
+                    actualFile1Name = file1.name;
+                    actualFile2Name = file2.name;
+                    if (!colName) {
+                        alert('请输入要处理的列名！');
+                        return;
+                    }
+
+                    file1Name = file1.name;
+                    $('#statusReport').html(
+                        "<span class='text-yellow-400'>正在深度读取和比对中，请稍候...</span>",
+                    );
+
+                    try {
+                        // 读取 Excel 1
+                        workbook1 = new ExcelJS.Workbook();
+                        await workbook1.xlsx.load(file1);
+                        const ws1 = workbook1.worksheets[0];
+
+                        // 读取 Excel 2
+                        const workbook2 = new ExcelJS.Workbook();
+                        await workbook2.xlsx.load(file2);
+                        const ws2 = workbook2.worksheets[0];
+
+                        const maxRows = Math.max(ws1.rowCount, ws2.rowCount);
+                        let mergedRows = []; // 存储所有被合并修正的行号
+
+                        // 遍历行处理
+                        for (let r = startRow; r <= maxRows; r++) {
+                            const cell1 = ws1.getCell(`${colName}${r}`);
+                            const cell2 = ws2.getCell(`${colName}${r}`);
+
+                            // 1. 获取原始值和类型，用于调试分析
+                            let rawValue = cell1.value;
+                            let valueType = typeof rawValue;
+
+                            if (rawValue && typeof rawValue === 'object') {
+                                if (rawValue.result !== undefined)
+                                    valueType = '公式 (结果: ' + typeof rawValue.result + ')';
+                                else if (rawValue.richText !== undefined) valueType = '富文本';
+                            }
+
+                            // 2. 判定Excel1单元格是否为空（深度清洗幽灵字符）
+                            let val1Str = '';
+                            if (cell1.value !== null && cell1.value !== undefined) {
+                                if (
+                                    typeof cell1.value === 'object' &&
+                                    cell1.value.result !== undefined
+                                ) {
+                                    val1Str = String(cell1.value.result);
+                                } else {
+                                    val1Str = String(cell1.value);
+                                }
+                            }
+                            val1Str = val1Str.replace(/[\s\u00A0\u200B\r\n]/g, '');
+
+                            // 3. 执行覆盖判断与具体填入内容捕获
+                            let isCovered = '【有值 正常跳过】';
+                            let fillDetail = '（未填入新值）';
+
+                            // 动态智能截取 Excel 2 真实文件名缩写，防止因文件名过长导致整行日志排版错位崩塌
+                            const file2ShortName =
+                                actualFile2Name.length > 15
+                                    ? actualFile2Name.substring(0, 12) + '...'
+                                    : actualFile2Name;
+
+                            if (val1Str === '') {
+                                if (cell2.value !== null && cell2.value !== undefined) {
+                                    let insertValue = cell2.value;
+                                    if (
+                                        insertValue &&
+                                        typeof insertValue === 'object' &&
+                                        insertValue.result !== undefined
+                                    ) {
+                                        insertValue = insertValue.result;
+                                    }
+                                    fillDetail = `（➔ 成功从 [${file2ShortName}] 填入新值: "${JSON.stringify(insertValue)}"）`;
+                                    isCovered = '【空 触发覆盖】';
+
+                                    // 1. 安全迁移数据值
+                                    cell1.value = cell2.value;
+
+                                    // 🛠️【核心修复】：利用 Object.create 彻底粉碎 Excel 共享样式字典，断开与 K、L 等其他列的指针连带关系！
+                                    cell1.style = Object.create(cell1.style || {});
+
+                                    // 2. 迁移基础对齐、边框与数字格式
+                                    if (cell2.alignment)
+                                        cell1.alignment = Object.assign({}, cell2.alignment);
+                                    if (cell2.border)
+                                        cell1.border = Object.assign({}, cell2.border);
+                                    if (cell2.numFmt) cell1.numFmt = cell2.numFmt;
+
+                                    // 3. 此时再安全地单独涂色，绝对不会再连带污染左侧其他任何列
+                                    cell1.fill = {
+                                        type: 'pattern',
+                                        pattern: 'solid',
+                                        fgColor: { argb: 'FFFF0000' }, // 真正的点对点孤立红底
+                                    };
+
+                                    // 4. 单独设置当前格为白字
+                                    const baseFont = cell2.font || {};
+                                    cell1.font = Object.assign({}, baseFont, {
+                                        color: { argb: 'FFFFFFFF' },
+                                    });
+
+                                    mergedRows.push(r);
+                                } else {
+                                    isCovered = '【空 无法覆盖】';
+                                    fillDetail = `（[${file2ShortName}] 对应位置无有效数据，未填入）`;
+                                }
+                            }
+
+                            // 4. 生成带毫秒的时间戳前缀
+                            const now = new Date();
+                            const timestamp =
+                                `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ` +
+                                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.` +
+                                `${String(now.getMilliseconds()).padStart(3, '0')}`;
+
+                            const logMessage = `[行号:${r}] 列:${colName} | 原始值: ${rawValue === null ? 'null' : JSON.stringify(rawValue)} | 判定类型: ${valueType} | 是否判定为空: ${isCovered} ${fillDetail}`;
+
+                            // 同时输出到浏览器控制台并存入 PDF 缓存数组
+                            console.log(`[${timestamp}] ` + logMessage);
+                            capturedLogs.push(`[${timestamp}] ${logMessage}`);
+                        }
+
+                        // 输出连续行号区间报告
+                        if (mergedRows.length > 0) {
+                            const intervals = getLineIntervals(mergedRows);
+                            let reportHtml = `<span class='text-green-400 font-bold'>🎉 合并分析成功！共补充了 ${mergedRows.length} 行缺失数据。</span><br><br>`;
+                            intervals.forEach((range) => {
+                                reportHtml += `🔹 <span class='text-blue-400'>${range}行</span> ${colName} 列 已成功从 Excel 2 提取并完成覆盖。<br>`;
+                            });
+                            $('#statusReport').html(reportHtml);
+                        } else {
+                            $('#statusReport').html(
+                                "<span class='text-gray-400'>检查完毕：指定范围内的 Excel 1 目标列全部有值，未触发任何数据覆盖。</span>",
+                            );
+                        }
+
+                        // 激活下载按钮样式
+                        $('#btnDownload')
+                            .removeAttr('disabled')
+                            .removeClass('bg-slate-300 text-slate-500 cursor-not-allowed')
+                            .addClass(
+                                'bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]',
+                            );
+                    } catch (error) {
+                        console.error(error);
+                        $('#statusReport').html(
+                            `<span class='text-red-500'>❌ 处理失败，请确保格式正确且未在本地打开。错误信息: ${error.message}</span>`,
+                        );
+                    }
+                });
+
+                // 下载处理好的表格并导出 PDF 报告
+                $('#btnDownload').click(async function () {
+                    if (!workbook1) return;
+                    $('#statusReport').append(
+                        "<br><span class='text-yellow-400 animate-pulse'>正在打包生成 Excel 与 详细覆盖 PDF 报告中...</span>",
+                    );
+
+                    // 1. 生成全局统一样式的时间戳后缀 (格式：20260730120526)
+                    const now = new Date();
+                    const timeStr =
+                        `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}` +
+                        `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+
+                    // 2. 导出 Excel（动态添加真实文件名和时间戳后缀）
+                    const buffer = await workbook1.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+
+                    // 动态提取基础表的不带后缀纯名称，并拼接时间戳
+                    const baseName = actualFile1Name.replace(/\.xlsx$/i, '');
+                    link.download = `[已自动合并]_${baseName}-${timeStr}.xlsx`;
+                    link.click();
+
+                    // 3. 构建并导出含有“真实文件名清单”的 PDF 报告
+                    const pdfContainer = document.createElement('div');
+                    pdfContainer.style.padding = '30px';
+                    pdfContainer.style.fontFamily = 'sans-serif';
+                    pdfContainer.style.color = '#333';
+                    pdfContainer.style.backgroundColor = '#fff';
+
+                    // 写入 PDF 头部标题及动态提取的真实文件数据清单摘要
+                    let pdfHtml = `
+        <h2 style="text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 5px; color: #1e293b; font-size: 22px;">数据自动覆盖合并分析报告</h2>
+        <div style="font-size: 11px; color: #64748b; text-align: center; margin-bottom: 20px;">生成时间: ${now.toLocaleString()}</div>
+        
+        <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 12px; line-height: 1.6;">
+          <strong style="color: #334155;">📁 本次合并处理文件清单：</strong><br>
+          <span style="color: #475569;">• <b>基础母表 (Excel 1)：</b>${actualFile1Name}</span><br>
+          <span style="color: #475569;">• <b>数据源表 (Excel 2)：</b>${actualFile2Name}</span>
+        </div>
+      `;
+
+                    // 按顺序写入所有捕捉到的详细日志序列
+                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #3b82f6; padding-left: 8px; margin-top: 20px; font-size: 14px;">一、控制台详细执行序列（含填入内容）</h3>`;
+                    pdfHtml += `<div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; font-family: monospace; font-size: 10px; line-height: 1.7; white-space: pre-wrap; margin-bottom: 25px;">`;
+
+                    if (capturedLogs.length === 0) {
+                        pdfHtml += `暂无遍历记录`;
+                    } else {
+                        const formattedLogs = capturedLogs.map((log) => {
+                            return log
+                                .replace(
+                                    /( 成功填入新值 : ".*?")/g,
+                                    '<span style="color: #16a34a; font-weight: bold;">$1</span>',
+                                )
+                                .replace(
+                                    /(【空 触发覆盖】)/g,
+                                    '<span style="color: #dc2626; font-weight: bold;">$1</span>',
+                                );
+                        });
+                        pdfHtml += formattedLogs.join('\n');
+                    }
+                    pdfHtml += `</div>`;
+
+                    // 抓取并写入前端页面上的“状态报告区总结文案”
+                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #10b981; padding-left: 8px; font-size: 14px;">二、前台分析总结报告</h3>`;
+                    const currentSummary = $('#statusReport')
+                        .html()
+                        .replace(/正在打包.*/, '') // 剔除打包中动态提示语
+                        .replace(/text-green-400/g, 'text-green-600')
+                        .replace(/text-blue-400/g, 'text-blue-600');
+
+                    pdfHtml += `<div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; font-size: 13px; border-radius: 6px; line-height: 1.5; color: #14532d;">${currentSummary}</div>`;
+
+                    pdfContainer.innerHTML = pdfHtml;
+
+                    // 配置 html2pdf 参数并驱动浏览器下载带有统一样式时间戳的 PDF 报告
+                    const pdfOptions = {
+                        margin: 15,
+                        filename: `合并报告-${timeStr}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        pagebreak: { mode: ['avoid-all', 'css'] },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    };
+
+                    // 执行 PDF 转换并唤起浏览器并行下载
+                    html2pdf()
+                        .set(pdfOptions)
+                        .from(pdfContainer)
+                        .save()
+                        .then(() => {
+                            $('#statusReport').find('.animate-pulse').remove(); // 移除加载动画
+                            $('#statusReport').append(
+                                `<br><span class='text-green-500 font-bold'> [${now.toLocaleTimeString()}] 『Excel表格』与『PDF详细覆盖报告』已同步成功下载！ </span>`,
+                            );
+                        });
+                });
+
+                // 核心算法：将离散的数组行号压缩为类似 "1-100" 形式的连续区间
+                function getLineIntervals(rows) {
+                    if (rows.length === 0) return [];
+                    rows.sort((a, b) => a - b);
+                    let result = [];
+                    let start = rows[0];
+                    let end = rows[0];
+
+                    for (let i = 1; i < rows.length; i++) {
+                        if (rows[i] === end + 1) {
+                            end = rows[i];
+                        } else {
+                            result.push(start === end ? `${start}` : `${start}-${end}`);
+                            start = rows[i];
+                            end = rows[i];
+                        }
+                    }
+                    result.push(start === end ? `${start}` : `${start}-${end}`);
+                    return result;
+                }
+            });
+        </script>
+    </body>
+</html>
+<!-- End-433-2026.07.30.115455 -->
