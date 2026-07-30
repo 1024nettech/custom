@@ -19,30 +19,51 @@
                 📊 启境GT7帖子审核-表格自动合并工具
             </h1>
 
-            <!-- 参数配置区 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- 参数配置区：4个控件一行，大屏4列、小屏自动换行 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1"
-                        >要处理的列名 (例如: M)</label
+                    <label class="block text-sm text-gray-600 mb-1">要处理的列名 (例如: M)</label>
+                    <input
+                        id="targetColumn"
+                        type="text"
+                        value="M"
+                        class="w-full border rounded px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">起始行号 (包含此行)</label>
+                    <input
+                        id="startRow"
+                        type="number"
+                        value="3"
+                        class="w-full border rounded px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1"
+                        >联合唯一性列名 (例如: BCK)</label
                     >
                     <input
                         type="text"
-                        id="targetColumn"
-                        value="M"
+                        id="uniqueKeyColumns"
+                        value="BCK"
+                        placeholder="多列请连续输入如 BCD"
                         class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
                     />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1"
-                        >起始行号 (包含此行)</label
+                    <label class="block text-sm text-gray-600 mb-1">覆盖填充背景色</label>
+                    <select
+                        id="fillColorSelect"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                     >
-                    <input
-                        type="number"
-                        id="startRow"
-                        value="3"
-                        min="1"
-                        class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                        <option value="FFC00000" selected>🟥 标准红 (Red)</option>
+                        <option value="FF00B050">🟩 标准绿 (Green)</option>
+                        <option value="FF00B0F0">🟦 标准蓝 (Blue)</option>
+                        <option value="FFF2BA02">🟨 标准黄 (Yellow)</option>
+                        <option value="FFEE822F">🟧 标准橙 (Orange)</option>
+                        <option value="NONE">⚪ 无填充 (不染色)</option>
+                    </select>
                 </div>
             </div>
 
@@ -93,6 +114,7 @@
                 </button>
             </div>
         </div>
+
         <!-- 爱情诗句展示区 -->
         <div
             class="container mx-auto max-w-4xl p-5 my-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl shadow border border-rose-100 text-center"
@@ -134,6 +156,7 @@
                 let workbook1 = null;
                 let file1Name = 'merged_excel.xlsx';
                 let capturedLogs = [];
+                let mismatchRows = []; // 新增这一行
                 // 新增：用于动态存储用户实际上传的真实文件名
                 let actualFile1Name = 'Excel 1 基础表';
                 let actualFile2Name = 'Excel 2 补充表';
@@ -173,6 +196,35 @@
                         await workbook2.xlsx.load(file2);
                         const ws2 = workbook2.worksheets[0];
 
+                        // 新增：解析参数并构建基于唯一KEY的跨文件错位匹配字典
+                        const uniqueCols = $('#uniqueKeyColumns')
+                            .val()
+                            .trim()
+                            .toUpperCase()
+                            .split('');
+                        const chosenColor = $('#fillColorSelect').val();
+                        if (uniqueCols.length === 0) {
+                            alert('请至少输入一个唯一性列名（如 BCD）！');
+                            return;
+                        }
+
+                        // 扫描 Excel 2 建立 哈希库
+                        const excel2Map = new Map();
+                        for (let r2 = startRow; r2 <= ws2.rowCount; r2++) {
+                            let keyParts = [];
+                            uniqueCols.forEach((col) => {
+                                const val = ws2.getCell(`${col}${r2}`).value;
+                                keyParts.push(
+                                    val !== null && val !== undefined ? String(val).trim() : '',
+                                );
+                            });
+                            const rowKey = keyParts.join('_');
+                            // 只有当KEY不为空时才记录，防止空行错乱
+                            if (rowKey.replace(/_/g, '') !== '') {
+                                excel2Map.set(rowKey, r2);
+                            }
+                        }
+
                         const maxRows = Math.max(ws1.rowCount, ws2.rowCount);
                         let mergedRows = []; // 存储所有被合并修正的行号
 
@@ -180,6 +232,40 @@
                         for (let r = startRow; r <= maxRows; r++) {
                             const cell1 = ws1.getCell(`${colName}${r}`);
                             const cell2 = ws2.getCell(`${colName}${r}`);
+
+                            // ——【核心安全锁逻辑】：提取 Excel 1 和 Excel 2 当前行的联合 KEY ——
+                            let keyParts1 = [];
+                            let keyParts2 = [];
+                            uniqueCols.forEach((col) => {
+                                const val1 = ws1.getCell(`${col}${r}`).value;
+                                const val2 = ws2.getCell(`${col}${r}`).value;
+                                keyParts1.push(
+                                    val1 !== null && val1 !== undefined ? String(val1).trim() : '',
+                                );
+                                keyParts2.push(
+                                    val2 !== null && val2 !== undefined ? String(val2).trim() : '',
+                                );
+                            });
+                            const rowKey1 = keyParts1.join('_');
+                            const rowKey2 = keyParts2.join('_');
+
+                            // 校验锁断言：如果同行 BCD 字符串拼接后不相等，则判定为错行，触发熔断拦截
+                            if (rowKey1 !== rowKey2) {
+                                mismatchRows.push({
+                                    row: r,
+                                    k1: rowKey1.replace(/_/g, ' | '),
+                                    k2: rowKey2.replace(/_/g, ' | '),
+                                });
+                                // 强制终止回填，直接格式化当前行的普通跳过日志
+                                let rawValue = cell1.value;
+                                let valueType = typeof rawValue;
+                                const now = new Date();
+                                const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.${String(now.getMilliseconds()).padStart(3, '0')}`;
+                                capturedLogs.push(
+                                    `[${timestamp}] [行号:${r}] 列:${colName} | 原始值: ${rawValue === null ? 'null' : JSON.stringify(rawValue)} | 判定类型: ${valueType} | 是否判定为空: 【🔑 KEY错配 拒绝覆盖】 （W1:"${rowKey1}" ⚡ W2:"${rowKey2}"）`,
+                                );
+                                continue;
+                            }
 
                             // 1. 获取原始值和类型，用于调试分析
                             let rawValue = cell1.value;
@@ -241,18 +327,22 @@
                                         cell1.border = Object.assign({}, cell2.border);
                                     if (cell2.numFmt) cell1.numFmt = cell2.numFmt;
 
-                                    // 3. 此时再安全地单独涂色，绝对不会再连带污染左侧其他任何列
-                                    cell1.fill = {
-                                        type: 'pattern',
-                                        pattern: 'solid',
-                                        fgColor: { argb: 'FFFF0000' }, // 真正的点对点孤立红底
-                                    };
-
-                                    // 4. 单独设置当前格为白字
-                                    const baseFont = cell2.font || {};
-                                    cell1.font = Object.assign({}, baseFont, {
-                                        color: { argb: 'FFFFFFFF' },
-                                    });
+                                    // 3. 🛠️【动态涂色修复】：根据用户下拉菜单的选择，按需对点对点孤立单元格进行精准着色
+                                    if (chosenColor !== 'NONE') {
+                                        cell1.fill = {
+                                            type: 'pattern',
+                                            pattern: 'solid',
+                                            fgColor: { argb: chosenColor },
+                                        };
+                                        // 黄色属于浅色，白字看不清，故切为黑字；其余暗色系配纯白字保证高对比度
+                                        const isLightColor = chosenColor === 'FFFFFF00';
+                                        const baseFont = cell2.font || {};
+                                        cell1.font = Object.assign({}, baseFont, {
+                                            color: { argb: isLightColor ? 'FF000000' : 'FFFFFFFF' },
+                                        });
+                                    } else {
+                                        if (cell2.font) cell1.font = Object.assign({}, cell2.font);
+                                    }
 
                                     mergedRows.push(r);
                                 } else {
@@ -343,14 +433,50 @@
         <div style="font-size: 11px; color: #64748b; text-align: center; margin-bottom: 20px;">生成时间: ${now.toLocaleString()}</div>
         
         <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 12px; line-height: 1.6;">
-          <strong style="color: #334155;">📁 本次合并处理文件清单：</strong><br>
+        <strong style="color: #334155;">📁 本次合并处理文件清单及配置参数：</strong><br>
           <span style="color: #475569;">• <b>基础母表 (Excel 1)：</b>${actualFile1Name}</span><br>
-          <span style="color: #475569;">• <b>数据源表 (Excel 2)：</b>${actualFile2Name}</span>
+          <span style="color: #475569;">• <b>数据源表 (Excel 2)：</b>${actualFile2Name}</span><br>
+          <span style="color: #475569;">• <b>联合唯一校验列 (KEY)：</b><span style="color: #2563eb; font-weight: bold;">${$('#uniqueKeyColumns').val().trim().toUpperCase()}</span></span><br>
+
+                    <span style="color: #475569;">• <b>覆盖单元格标记色：</b><span style="color: #1e293b; font-weight: bold;">${$('#fillColorSelect option:selected').text()}</span></span>
+        </div>
+
+        <!-- 新增：二、联合唯一KEY同行比对失败异常拦截账本 -->
+        <h3 style="color: #b45309; border-left: 4px solid #f59e0b; padding-left: 8px; margin-top: 20px; font-size: 14px;">一、联合唯一KEY同行比对失败拦截账本 (未进行任何覆盖)</h3>
+        <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 11px;">
+            ${
+                mismatchRows.length === 0
+                    ? '<span style="color: #16a34a; font-weight: bold;">➔ 完美通关！全表未发现任何同行 KEY 错配现象。</span>'
+                    : `<table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #fcd34d; color: #92400e;">
+                            <th style="padding: 4px;">错配行号</th>
+                            <th style="padding: 4px;">Excel 1 (基础表) 关键特征</th>
+                            <th style="padding: 4px;">Excel 2 (补充表) 关键特征</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mismatchRows
+                            .map(
+                                (item) => `
+                            <tr style="border-bottom: 1px solid #fef3c7; color: #b45309;">
+                                <td style="padding: 6px 4px; font-weight: bold;">第 ${item.row} 行</td>
+                                <td style="padding: 6px 4px; font-family: monospace;">[ ${item.k1 || '空'} ]</td>
+                                <td style="padding: 6px 4px; font-family: monospace;">[ ${item.k2 || '空'} ]</td>
+                            </tr>
+                        `,
+                            )
+                            .join('')}
+                    </tbody>
+                 </table>`
+            }
         </div>
       `;
 
                     // 按顺序写入所有捕捉到的详细日志序列
-                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #3b82f6; padding-left: 8px; margin-top: 20px; font-size: 14px;">一、控制台详细执行序列（含填入内容）</h3>`;
+                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #3b82f6; padding-left: 8px; margin-top: 20px; font-size: 14px;">三、控制台详细执行序列（含填入内容）</h3>`;
+
+                    // 按顺序写入所有捕捉到的详细日志序列
                     pdfHtml += `<div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; font-family: monospace; font-size: 10px; line-height: 1.7; white-space: pre-wrap; margin-bottom: 25px;">`;
 
                     if (capturedLogs.length === 0) {
@@ -430,4 +556,4 @@
         </script>
     </body>
 </html>
-<!-- End-433-2026.07.30.124203 -->
+<!-- End-559-2026.07.30.161028 -->
