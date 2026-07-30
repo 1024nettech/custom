@@ -473,6 +473,16 @@
         </div>
       `;
 
+                    // 抓取并写入前端页面上的“状态报告区总结文案”
+                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #10b981; padding-left: 8px; font-size: 14px;">二、前台分析总结报告</h3>`;
+                    const currentSummary = $('#statusReport')
+                        .html()
+                        .replace(/正在打包.*/, '') // 剔除打包中动态提示语
+                        .replace(/text-green-400/g, 'text-green-600')
+                        .replace(/text-blue-400/g, 'text-blue-600');
+
+                    pdfHtml += `<div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; font-size: 13px; border-radius: 6px; line-height: 1.5; color: #14532d;">${currentSummary}</div>`;
+
                     // 按顺序写入所有捕捉到的详细日志序列
                     pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #3b82f6; padding-left: 8px; margin-top: 20px; font-size: 14px;">三、控制台详细执行序列（含填入内容）</h3>`;
 
@@ -497,24 +507,14 @@
                     }
                     pdfHtml += `</div>`;
 
-                    // 抓取并写入前端页面上的“状态报告区总结文案”
-                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #10b981; padding-left: 8px; font-size: 14px;">二、前台分析总结报告</h3>`;
-                    const currentSummary = $('#statusReport')
-                        .html()
-                        .replace(/正在打包.*/, '') // 剔除打包中动态提示语
-                        .replace(/text-green-400/g, 'text-green-600')
-                        .replace(/text-blue-400/g, 'text-blue-600');
-
-                    pdfHtml += `<div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; font-size: 13px; border-radius: 6px; line-height: 1.5; color: #14532d;">${currentSummary}</div>`;
-
                     pdfContainer.innerHTML = pdfHtml;
 
                     // 配置 html2pdf 参数并驱动浏览器下载带有统一样式时间戳的 PDF 报告
                     const pdfOptions = {
                         margin: 15,
                         filename: `合并报告-${timeStr}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
+                        image: { type: 'jpeg', quality: 0.8 },
+                        html2canvas: { scale: 3, useCORS: true },
                         pagebreak: { mode: ['avoid-all', 'css'] },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                     };
@@ -678,4 +678,4 @@
         </script>
     </body>
 </html>
-<!-- End-681-2026.07.30.162201 -->
+<!-- End-681-2026.07.30.164545 -->
