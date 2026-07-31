@@ -3,30 +3,206 @@
     <head>
         <meta charset="UTF-8" />
         <title>表格自动合并</title>
-        <!-- 引入 Tailwind CSS 和 jQuery -->
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/4.0.0/jquery.min.js"></script>
-        <!-- 引入强大的 ExcelJS 库，完美支持保留原始样式 -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-        <!-- 引入 html2pdf 库以支持将页面或生成的日志 DOM 完美转换为 PDF -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <!-- MD5 用于内容校验 Start-->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.19.0/js/md5.min.js"></script> -->
+        <script>
+            !(function (n) {
+                'use strict';
+                function d(n, t) {
+                    var r = (65535 & n) + (65535 & t);
+                    return (((n >> 16) + (t >> 16) + (r >> 16)) << 16) | (65535 & r);
+                }
+                function f(n, t, r, e, o, u) {
+                    return d(((u = d(d(t, n), d(e, u))) << o) | (u >>> (32 - o)), r);
+                }
+                function l(n, t, r, e, o, u, c) {
+                    return f((t & r) | (~t & e), n, t, o, u, c);
+                }
+                function g(n, t, r, e, o, u, c) {
+                    return f((t & e) | (r & ~e), n, t, o, u, c);
+                }
+                function v(n, t, r, e, o, u, c) {
+                    return f(t ^ r ^ e, n, t, o, u, c);
+                }
+                function m(n, t, r, e, o, u, c) {
+                    return f(r ^ (t | ~e), n, t, o, u, c);
+                }
+                function c(n, t) {
+                    var r, e, o, u;
+                    ((n[t >> 5] |= 128 << (t % 32)), (n[14 + (((t + 64) >>> 9) << 4)] = t));
+                    for (
+                        var c = 1732584193, f = -271733879, i = -1732584194, a = 271733878, h = 0;
+                        h < n.length;
+                        h += 16
+                    )
+                        ((c = l((r = c), (e = f), (o = i), (u = a), n[h], 7, -680876936)),
+                            (a = l(a, c, f, i, n[h + 1], 12, -389564586)),
+                            (i = l(i, a, c, f, n[h + 2], 17, 606105819)),
+                            (f = l(f, i, a, c, n[h + 3], 22, -1044525330)),
+                            (c = l(c, f, i, a, n[h + 4], 7, -176418897)),
+                            (a = l(a, c, f, i, n[h + 5], 12, 1200080426)),
+                            (i = l(i, a, c, f, n[h + 6], 17, -1473231341)),
+                            (f = l(f, i, a, c, n[h + 7], 22, -45705983)),
+                            (c = l(c, f, i, a, n[h + 8], 7, 1770035416)),
+                            (a = l(a, c, f, i, n[h + 9], 12, -1958414417)),
+                            (i = l(i, a, c, f, n[h + 10], 17, -42063)),
+                            (f = l(f, i, a, c, n[h + 11], 22, -1990404162)),
+                            (c = l(c, f, i, a, n[h + 12], 7, 1804603682)),
+                            (a = l(a, c, f, i, n[h + 13], 12, -40341101)),
+                            (i = l(i, a, c, f, n[h + 14], 17, -1502002290)),
+                            (c = g(
+                                c,
+                                (f = l(f, i, a, c, n[h + 15], 22, 1236535329)),
+                                i,
+                                a,
+                                n[h + 1],
+                                5,
+                                -165796510,
+                            )),
+                            (a = g(a, c, f, i, n[h + 6], 9, -1069501632)),
+                            (i = g(i, a, c, f, n[h + 11], 14, 643717713)),
+                            (f = g(f, i, a, c, n[h], 20, -373897302)),
+                            (c = g(c, f, i, a, n[h + 5], 5, -701558691)),
+                            (a = g(a, c, f, i, n[h + 10], 9, 38016083)),
+                            (i = g(i, a, c, f, n[h + 15], 14, -660478335)),
+                            (f = g(f, i, a, c, n[h + 4], 20, -405537848)),
+                            (c = g(c, f, i, a, n[h + 9], 5, 568446438)),
+                            (a = g(a, c, f, i, n[h + 14], 9, -1019803690)),
+                            (i = g(i, a, c, f, n[h + 3], 14, -187363961)),
+                            (f = g(f, i, a, c, n[h + 8], 20, 1163531501)),
+                            (c = g(c, f, i, a, n[h + 13], 5, -1444681467)),
+                            (a = g(a, c, f, i, n[h + 2], 9, -51403784)),
+                            (i = g(i, a, c, f, n[h + 7], 14, 1735328473)),
+                            (c = v(
+                                c,
+                                (f = g(f, i, a, c, n[h + 12], 20, -1926607734)),
+                                i,
+                                a,
+                                n[h + 5],
+                                4,
+                                -378558,
+                            )),
+                            (a = v(a, c, f, i, n[h + 8], 11, -2022574463)),
+                            (i = v(i, a, c, f, n[h + 11], 16, 1839030562)),
+                            (f = v(f, i, a, c, n[h + 14], 23, -35309556)),
+                            (c = v(c, f, i, a, n[h + 1], 4, -1530992060)),
+                            (a = v(a, c, f, i, n[h + 4], 11, 1272893353)),
+                            (i = v(i, a, c, f, n[h + 7], 16, -155497632)),
+                            (f = v(f, i, a, c, n[h + 10], 23, -1094730640)),
+                            (c = v(c, f, i, a, n[h + 13], 4, 681279174)),
+                            (a = v(a, c, f, i, n[h], 11, -358537222)),
+                            (i = v(i, a, c, f, n[h + 3], 16, -722521979)),
+                            (f = v(f, i, a, c, n[h + 6], 23, 76029189)),
+                            (c = v(c, f, i, a, n[h + 9], 4, -640364487)),
+                            (a = v(a, c, f, i, n[h + 12], 11, -421815835)),
+                            (i = v(i, a, c, f, n[h + 15], 16, 530742520)),
+                            (c = m(
+                                c,
+                                (f = v(f, i, a, c, n[h + 2], 23, -995338651)),
+                                i,
+                                a,
+                                n[h],
+                                6,
+                                -198630844,
+                            )),
+                            (a = m(a, c, f, i, n[h + 7], 10, 1126891415)),
+                            (i = m(i, a, c, f, n[h + 14], 15, -1416354905)),
+                            (f = m(f, i, a, c, n[h + 5], 21, -57434055)),
+                            (c = m(c, f, i, a, n[h + 12], 6, 1700485571)),
+                            (a = m(a, c, f, i, n[h + 3], 10, -1894986606)),
+                            (i = m(i, a, c, f, n[h + 10], 15, -1051523)),
+                            (f = m(f, i, a, c, n[h + 1], 21, -2054922799)),
+                            (c = m(c, f, i, a, n[h + 8], 6, 1873313359)),
+                            (a = m(a, c, f, i, n[h + 15], 10, -30611744)),
+                            (i = m(i, a, c, f, n[h + 6], 15, -1560198380)),
+                            (f = m(f, i, a, c, n[h + 13], 21, 1309151649)),
+                            (c = m(c, f, i, a, n[h + 4], 6, -145523070)),
+                            (a = m(a, c, f, i, n[h + 11], 10, -1120210379)),
+                            (i = m(i, a, c, f, n[h + 2], 15, 718787259)),
+                            (f = m(f, i, a, c, n[h + 9], 21, -343485551)),
+                            (c = d(c, r)),
+                            (f = d(f, e)),
+                            (i = d(i, o)),
+                            (a = d(a, u)));
+                    return [c, f, i, a];
+                }
+                function i(n) {
+                    for (var t = '', r = 32 * n.length, e = 0; e < r; e += 8)
+                        t += String.fromCharCode((n[e >> 5] >>> (e % 32)) & 255);
+                    return t;
+                }
+                function a(n) {
+                    var t = [];
+                    for (t[(n.length >> 2) - 1] = void 0, e = 0; e < t.length; e += 1) t[e] = 0;
+                    for (var r = 8 * n.length, e = 0; e < r; e += 8)
+                        t[e >> 5] |= (255 & n.charCodeAt(e / 8)) << (e % 32);
+                    return t;
+                }
+                function e(n) {
+                    for (var t, r = '0123456789abcdef', e = '', o = 0; o < n.length; o += 1)
+                        ((t = n.charCodeAt(o)), (e += r.charAt((t >>> 4) & 15) + r.charAt(15 & t)));
+                    return e;
+                }
+                function r(n) {
+                    return unescape(encodeURIComponent(n));
+                }
+                function o(n) {
+                    return i(c(a((n = r(n))), 8 * n.length));
+                }
+                function u(n, t) {
+                    return (function (n, t) {
+                        var r,
+                            e = a(n),
+                            o = [],
+                            u = [];
+                        for (
+                            o[15] = u[15] = void 0,
+                                16 < e.length && (e = c(e, 8 * n.length)),
+                                r = 0;
+                            r < 16;
+                            r += 1
+                        )
+                            ((o[r] = 909522486 ^ e[r]), (u[r] = 1549556828 ^ e[r]));
+                        return (
+                            (t = c(o.concat(a(t)), 512 + 8 * t.length)),
+                            i(c(u.concat(t), 640))
+                        );
+                    })(r(n), r(t));
+                }
+                function t(n, t, r) {
+                    return t ? (r ? u(t, n) : e(u(t, n))) : r ? o(n) : e(o(n));
+                }
+                'function' == typeof define && define.amd
+                    ? define(function () {
+                          return t;
+                      })
+                    : 'object' == typeof module && module.exports
+                      ? (module.exports = t)
+                      : (n.md5 = t);
+            })(this);
+            //# sourceMappingURL=md5.min.js.map
+        </script>
+        <!-- MD5 用于内容校验 End-->
     </head>
     <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
         <div
             class="container mx-auto max-w-4xl p-6 mt-10 bg-white rounded-xl shadow-md border border-slate-100"
         >
             <h1 class="text-2xl font-bold text-slate-700 mb-6 text-center border-b pb-4">
-                📊 启境GT7帖子审核-表格自动合并工具
+                📊 表格自动合并工具
             </h1>
 
-            <!-- 参数配置区：4个控件一行，大屏4列、小屏自动换行 -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div>
-                    <label class="block text-sm text-gray-600 mb-1">要处理的列名 (例如: M)</label>
+                    <label class="block text-sm text-gray-600 mb-1">要处理的列名 (多列+分隔)</label>
                     <input
                         id="targetColumn"
                         type="text"
                         value="M"
+                        placeholder="A+B+C"
                         class="w-full border rounded px-3 py-2"
                     />
                 </div>
@@ -41,21 +217,21 @@
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600 mb-1"
-                        >联合唯一性列名 (例如: BCK)</label
+                        >联合唯一性列名 (多列+分隔)</label
                     >
                     <input
                         type="text"
                         id="uniqueKeyColumns"
-                        value="BCK"
-                        placeholder="多列请连续输入如 BCD"
-                        class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                        value="B+C+K"
+                        placeholder="A+B+C"
+                        class="w-full px-3 py-2 border rounded-lg"
                     />
                 </div>
                 <div>
                     <label class="block text-sm text-gray-600 mb-1">覆盖填充背景色</label>
                     <select
                         id="fillColorSelect"
-                        class="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        class="w-full px-3 py-2 border rounded-lg bg-white"
                     >
                         <option value="FFC00000" selected>🟥 标准红 (Red)</option>
                         <option value="FF00B050">🟩 标准绿 (Green)</option>
@@ -67,85 +243,45 @@
                 </div>
             </div>
 
-            <!-- 文件上传与处理区 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div
-                    class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 hover:bg-slate-100 transition"
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50"
                 >
-                    <span class="text-sm font-medium text-slate-600 mb-2"
-                        >📁 上传Alice宝宝的基础表 (Excel 1)</span
-                    >
-                    <input
-                        type="file"
-                        id="uploadExcel1"
-                        accept=".xlsx"
-                        class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
+                    <span class="text-sm font-medium text-slate-600 mb-2">📁 基础表 (Excel1)</span>
+                    <input type="file" id="uploadExcel1" accept=".xlsx" class="text-xs" />
                 </div>
                 <div
-                    class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 hover:bg-slate-100 transition"
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 bg-slate-50"
                 >
-                    <span class="text-sm font-medium text-slate-600 mb-2"
-                        >📁 上传Alice小伙伴的补充表 (Excel 2)</span
-                    >
-                    <input
-                        type="file"
-                        id="uploadExcel2"
-                        accept=".xlsx"
-                        class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                    />
+                    <span class="text-sm font-medium text-slate-600 mb-2">📁 补充表 (Excel2)</span>
+                    <input type="file" id="uploadExcel2" accept=".xlsx" class="text-xs" />
                 </div>
             </div>
 
-            <!-- 动作操作按钮 -->
             <div class="flex gap-4">
                 <button
                     id="btnProcess"
-                    class="flex-1 bg-blue-600 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:bg-blue-700 active:scale-[0.98] transition"
+                    class="flex-1 bg-blue-600 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:bg-blue-700 transition"
                 >
                     ⚡ 执行合并分析
                 </button>
                 <button
                     id="btnDownload"
                     disabled
-                    class="flex-1 bg-slate-300 text-slate-500 font-medium py-3 px-4 rounded-xl shadow-md cursor-not-allowed transition"
+                    class="flex-1 bg-slate-300 text-slate-500 font-medium py-3 px-4 rounded-xl cursor-not-allowed transition"
                 >
-                    📥 下载合并后的 Excel 1
+                    📥 下载Excel + 报告
                 </button>
             </div>
         </div>
 
-        <!-- 爱情诗句展示区 -->
         <div
-            class="container mx-auto max-w-4xl p-5 my-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl shadow border border-rose-100 text-center"
+            class="container mx-auto max-w-4xl p-4 my-6 bg-slate-900 text-slate-200 rounded-xl shadow-lg"
         >
-            <p
-                id="lovePoem"
-                class="text-base font-medium text-rose-700 italic tracking-wide transition-all duration-500 opacity-100"
-            >
-                “ 答案很长，我准备用一生的时间来回答。 —— 林徽因 ”
-            </p>
-            <button
-                id="btnRefreshPoem"
-                class="mt-2 text-xs font-semibold text-rose-400 hover:text-rose-600 active:scale-95 transition"
-            >
-                ✨ 换一句缘分
-            </button>
-        </div>
-
-        <!-- 底部状态与日志提示区 -->
-        <div
-            class="container mx-auto max-w-4xl p-4 my-6 bg-slate-900 text-slate-200 rounded-xl shadow-lg border border-slate-800"
-        >
-            <h3
-                class="text-sm font-semibold tracking-wider text-slate-400 mb-2 uppercase flex items-center gap-2"
-            >
-                <span class="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                状态报告区
-            </h3>
+            <h3 class="text-sm font-semibold text-slate-400 mb-2">状态报告区</h3>
             <div
                 id="statusReport"
-                class="text-xs font-mono max-h-40 overflow-y-auto space-y-1 text-slate-300 bg-slate-950 p-3 rounded border border-slate-800"
+                class="text-xs font-mono max-h-40 overflow-y-auto space-y-1 text-slate-300 bg-slate-950 p-3 rounded"
             >
                 等待上传文件并点击“执行合并分析”...
             </div>
@@ -154,86 +290,220 @@
         <script>
             $(document).ready(function () {
                 let workbook1 = null;
-                let file1Name = 'merged_excel.xlsx';
-                let capturedLogs = [];
-                let mismatchRows = []; // 新增这一行
-                // 新增：用于动态存储用户实际上传的真实文件名
                 let actualFile1Name = 'Excel 1 基础表';
                 let actualFile2Name = 'Excel 2 补充表';
+                let capturedLogs = [];
+                let mismatchRows = [];
+                let mergedRows = [];
+                let isRunning = false;
 
-                // 执行合并逻辑
+                const SVG_MARGIN = 20;
+                const SVG_MAX_TEXT_WIDTH = 860; // 最大文本行宽，超出自动换行
+                const LINE_HEIGHT = 22;
+
+                function getLineIntervals(rows) {
+                    if (rows.length === 0) return [];
+                    rows.sort((a, b) => a - b);
+                    let result = [];
+                    let start = rows[0];
+                    let end = rows[0];
+                    for (let i = 1; i < rows.length; i++) {
+                        if (rows[i] === end + 1) {
+                            end = rows[i];
+                        } else {
+                            result.push(start === end ? `${start}` : `${start}-${end}`);
+                            start = rows[i];
+                            end = rows[i];
+                        }
+                    }
+                    result.push(start === end ? `${start}` : `${start}-${end}`);
+                    return result;
+                }
+
+                function getTimeStamp() {
+                    const now = new Date();
+                    return (
+                        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ` +
+                        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.` +
+                        `${String(now.getMilliseconds()).padStart(3, '0')}`
+                    );
+                }
+
+                function parseColumnList(inputStr) {
+                    return inputStr
+                        .trim()
+                        .toUpperCase()
+                        .split('+')
+                        .map((s) => s.trim())
+                        .filter((s) => s !== '');
+                }
+
+                function getVerifySourceText() {
+                    const targetCols = $('#targetColumn').val().trim().toUpperCase();
+                    const keyCols = $('#uniqueKeyColumns').val().trim().toUpperCase();
+                    const color = $('#fillColorSelect').val();
+                    const combineStr = [
+                        actualFile1Name,
+                        actualFile2Name,
+                        targetCols,
+                        keyCols,
+                        color,
+                        JSON.stringify(capturedLogs),
+                        JSON.stringify(mismatchRows),
+                        JSON.stringify(mergedRows),
+                    ].join('|||');
+                    return combineStr;
+                }
+
+                /**
+                 * 工具：文本自动换行拆分，用于SVG
+                 */
+                function wrapText(text, maxWidth = SVG_MAX_TEXT_WIDTH) {
+                    // 简易按空格切分换行，可根据需要优化
+                    const words = text.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    for (const w of words) {
+                        const test = (currentLine ? currentLine + ' ' : '') + w;
+                        if (test.length > 110) {
+                            lines.push(currentLine);
+                            currentLine = w;
+                        } else {
+                            currentLine = test;
+                        }
+                    }
+                    if (currentLine) lines.push(currentLine);
+                    return lines;
+                }
+
+                // ====================== 导出纯 HTML 网页格式报告（彻底杜绝文本重叠） ======================
+                async function exportSvgReport(timeStr) {
+                    const htmlParts = [];
+
+                    // 1. 构建 HTML 框架及响应式样式（最大宽度100vw，四周20px margin，支持文本强行换行）
+                    htmlParts.push(`<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据自动覆盖合并分析报告</title>
+    <style>
+        body { margin: 0; background-color: #f8fafc; font-family: Consolas, "PingFang SC", system-ui, sans-serif; display: flex; justify-content: center; }
+        .report-container { width: 100vw; max-width: 100vw; margin: 20px; box-sizing: border-box; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .title { font-size: 24px; font-weight: bold; color: #1e293b; margin-bottom: 8px; text-align: center; }
+        .subinfo { font-size: 12px; color: #64748b; margin-bottom: 24px; text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
+        .section-title { font-size: 16px; font-weight: bold; color: #92400e; margin-top: 24px; margin-bottom: 12px; border-left: 4px solid #92400e; padding-left: 8px; }
+        .log-p { font-size: 13px; color: #334155; line-height: 1.6; margin: 0 0 8px 0; word-break: break-all; white-space: pre-wrap; border-bottom: 1px dashed #f1f5f9; padding-bottom: 6px; }
+        .text-green { color: #16a34a; font-weight: bold; }
+        .text-red { color: #dc2626; font-weight: bold; }
+        .info-block { background: #f1f5f9; padding: 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; color: #475569; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="title">数据自动覆盖合并分析报告</div>
+        <div class="subinfo">生成时间: ${new Date().toLocaleString()}</div>
+        
+        <div class="info-block">
+            <p style="margin:0 0 4px 0;"><strong>基础表 (Excel1):</strong> ${actualFile1Name}</p>
+            <p style="margin:0 0 4px 0;"><strong>补充表 (Excel2):</strong> ${actualFile2Name}</p>
+            <p style="margin:0 0 4px 0;"><strong>目标列:</strong> ${$('#targetColumn').val().trim().toUpperCase()}</p>
+            <p style="margin:0;"><strong>KEY校验列:</strong> ${$('#uniqueKeyColumns').val().trim().toUpperCase()}</p>
+        </div>`);
+
+                    // 2. 写入第一部分：KEY错配记录
+                    htmlParts.push(`<div class="section-title">一、KEY同行比对失败记录</div>`);
+                    if (mismatchRows.length === 0) {
+                        htmlParts.push(`<p class="log-p text-green">无 KEY 错配记录</p>`);
+                    } else {
+                        mismatchRows.forEach((item) => {
+                            htmlParts.push(
+                                `<p class="log-p">行 ${item.row} | W1: [<span>${item.k1}</span>] | W2: [<span>${item.k2}</span>]</p>`,
+                            );
+                        });
+                    }
+
+                    // 3. 写入第二部分：完整执行日志
+                    htmlParts.push(`<div class="section-title">二、完整执行日志</div>`);
+                    capturedLogs.forEach((log) => {
+                        // 渲染时进行高亮替换
+                        let renderText = log
+                            .replace(
+                                /( 成功填入新值 : ".*?")/g,
+                                `<span class="text-green">$1</span>`,
+                            )
+                            .replace(/(【空 触发覆盖】)/g, `<span class="text-red">$1</span>`);
+
+                        htmlParts.push(`<p class="log-p">${renderText}</p>`);
+                    });
+
+                    // 4. 闭合标签
+                    htmlParts.push(`    </div>
+</body>
+</html>`);
+
+                    // 5. 触发纯 HTML 报告文件下载
+                    const blob = new Blob([htmlParts.join('\n')], {
+                        type: 'text/html;charset=utf-8',
+                    });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `合并数据分析报告-${timeStr}.html`;
+                    a.click();
+                }
+
+                // ====================== 执行合并逻辑（增加console行号输出） ======================
                 $('#btnProcess').click(async function () {
+                    if (isRunning) {
+                        alert('任务正在处理中，请等待完成！');
+                        return;
+                    }
                     const file1 = $('#uploadExcel1')[0].files[0];
                     const file2 = $('#uploadExcel2')[0].files[0];
-                    const colName = $('#targetColumn').val().trim().toUpperCase();
-                    const startRow = parseInt($('#startRow').val()) || 1;
-
                     if (!file1 || !file2) {
-                        alert('请同时上传 Excel 1 和 Excel 2！');
+                        alert('请同时上传 Excel1 和 Excel2！');
                         return;
                     }
-                    // 新增：动态截取存储文件的真实名字，剔除硬编码
+
+                    const targetColumnInput = $('#targetColumn').val();
+                    const uniqueKeyInput = $('#uniqueKeyColumns').val();
+                    const startRow = parseInt($('#startRow').val()) || 1;
+                    const chosenColor = $('#fillColorSelect').val();
+
+                    const targetColumns = parseColumnList(targetColumnInput);
+                    const uniqueCols = parseColumnList(uniqueKeyInput);
+
+                    if (targetColumns.length === 0 || uniqueCols.length === 0) {
+                        alert('目标列、KEY列不能为空！');
+                        return;
+                    }
+
+                    isRunning = true;
+                    capturedLogs = [];
+                    mismatchRows = [];
+                    mergedRows = [];
                     actualFile1Name = file1.name;
                     actualFile2Name = file2.name;
-                    if (!colName) {
-                        alert('请输入要处理的列名！');
-                        return;
-                    }
-
-                    file1Name = file1.name;
                     $('#statusReport').html(
-                        "<span class='text-yellow-400'>正在深度读取和比对中，请稍候...</span>",
+                        "<span class='text-yellow-400'>正在读取比对表格...</span>",
                     );
+                    $('#btnDownload').prop('disabled', true);
 
                     try {
-                        // 读取 Excel 1
                         workbook1 = new ExcelJS.Workbook();
                         await workbook1.xlsx.load(file1);
                         const ws1 = workbook1.worksheets[0];
 
-                        // 读取 Excel 2
                         const workbook2 = new ExcelJS.Workbook();
                         await workbook2.xlsx.load(file2);
                         const ws2 = workbook2.worksheets[0];
 
-                        // 新增：解析参数并构建基于唯一KEY的跨文件错位匹配字典
-                        const uniqueCols = $('#uniqueKeyColumns')
-                            .val()
-                            .trim()
-                            .toUpperCase()
-                            .split('');
-                        const chosenColor = $('#fillColorSelect').val();
-                        if (uniqueCols.length === 0) {
-                            alert('请至少输入一个唯一性列名（如 BCD）！');
-                            return;
-                        }
-
-                        // 扫描 Excel 2 建立 哈希库
-                        const excel2Map = new Map();
-                        for (let r2 = startRow; r2 <= ws2.rowCount; r2++) {
-                            let keyParts = [];
-                            uniqueCols.forEach((col) => {
-                                const val = ws2.getCell(`${col}${r2}`).value;
-                                keyParts.push(
-                                    val !== null && val !== undefined ? String(val).trim() : '',
-                                );
-                            });
-                            const rowKey = keyParts.join('_');
-                            // 只有当KEY不为空时才记录，防止空行错乱
-                            if (rowKey.replace(/_/g, '') !== '') {
-                                excel2Map.set(rowKey, r2);
-                            }
-                        }
-
+                        // 取两个表格最大行号作为循环上限
                         const maxRows = Math.max(ws1.rowCount, ws2.rowCount);
-                        let mergedRows = []; // 存储所有被合并修正的行号
+                        console.log(`开始遍历，起始行：${startRow}，最大循环行：${maxRows}`);
 
-                        // 遍历行处理
                         for (let r = startRow; r <= maxRows; r++) {
-                            const cell1 = ws1.getCell(`${colName}${r}`);
-                            const cell2 = ws2.getCell(`${colName}${r}`);
+                            console.log(`正在处理行号：${r}`); // 调试输出行号
 
-                            // ——【核心安全锁逻辑】：提取 Excel 1 和 Excel 2 当前行的联合 KEY ——
                             let keyParts1 = [];
                             let keyParts2 = [];
                             uniqueCols.forEach((col) => {
@@ -249,433 +519,144 @@
                             const rowKey1 = keyParts1.join('_');
                             const rowKey2 = keyParts2.join('_');
 
-                            // 校验锁断言：如果同行 BCD 字符串拼接后不相等，则判定为错行，触发熔断拦截
                             if (rowKey1 !== rowKey2) {
                                 mismatchRows.push({
                                     row: r,
                                     k1: rowKey1.replace(/_/g, ' | '),
                                     k2: rowKey2.replace(/_/g, ' | '),
                                 });
-                                // 强制终止回填，直接格式化当前行的普通跳过日志
-                                let rawValue = cell1.value;
-                                let valueType = typeof rawValue;
-                                const now = new Date();
-                                const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.${String(now.getMilliseconds()).padStart(3, '0')}`;
-                                capturedLogs.push(
-                                    `[${timestamp}] [行号:${r}] 列:${colName} | 原始值: ${rawValue === null ? 'null' : JSON.stringify(rawValue)} | 判定类型: ${valueType} | 是否判定为空: 【🔑 KEY错配 拒绝覆盖】 （W1:"${rowKey1}" ⚡ W2:"${rowKey2}"）`,
-                                );
+                                const logStr = `[${getTimeStamp()}] [行号:${r}] 【🔑 KEY错配 整行跳过】 W1:"${rowKey1}" W2:"${rowKey2}"`;
+                                capturedLogs.push(logStr);
                                 continue;
                             }
 
-                            // 1. 获取原始值和类型，用于调试分析
-                            let rawValue = cell1.value;
-                            let valueType = typeof rawValue;
+                            for (const colName of targetColumns) {
+                                const cell1 = ws1.getCell(`${colName}${r}`);
+                                const cell2 = ws2.getCell(`${colName}${r}`);
 
-                            if (rawValue && typeof rawValue === 'object') {
-                                if (rawValue.result !== undefined)
-                                    valueType = '公式 (结果: ' + typeof rawValue.result + ')';
-                                else if (rawValue.richText !== undefined) valueType = '富文本';
-                            }
-
-                            // 2. 判定Excel1单元格是否为空（深度清洗幽灵字符）
-                            let val1Str = '';
-                            if (cell1.value !== null && cell1.value !== undefined) {
-                                if (
-                                    typeof cell1.value === 'object' &&
-                                    cell1.value.result !== undefined
-                                ) {
-                                    val1Str = String(cell1.value.result);
-                                } else {
-                                    val1Str = String(cell1.value);
-                                }
-                            }
-                            val1Str = val1Str.replace(/[\s\u00A0\u200B\r\n]/g, '');
-
-                            // 3. 执行覆盖判断与具体填入内容捕获
-                            let isCovered = '【有值 正常跳过】';
-                            let fillDetail = '（未填入新值）';
-
-                            // 动态智能截取 Excel 2 真实文件名缩写，防止因文件名过长导致整行日志排版错位崩塌
-                            const file2ShortName =
-                                actualFile2Name.length > 15
-                                    ? actualFile2Name.substring(0, 12) + '...'
-                                    : actualFile2Name;
-
-                            if (val1Str === '') {
-                                if (cell2.value !== null && cell2.value !== undefined) {
-                                    let insertValue = cell2.value;
+                                let val1Str = '';
+                                if (cell1.value !== null && cell1.value !== undefined) {
                                     if (
-                                        insertValue &&
-                                        typeof insertValue === 'object' &&
-                                        insertValue.result !== undefined
+                                        typeof cell1.value === 'object' &&
+                                        cell1.value.result !== undefined
                                     ) {
-                                        insertValue = insertValue.result;
-                                    }
-                                    fillDetail = `（➔ 成功从 [${file2ShortName}] 填入新值: "${JSON.stringify(insertValue)}"）`;
-                                    isCovered = '【空 触发覆盖】';
-
-                                    // 1. 安全迁移数据值
-                                    cell1.value = cell2.value;
-
-                                    // 🛠️【核心修复】：利用 Object.create 彻底粉碎 Excel 共享样式字典，断开与 K、L 等其他列的指针连带关系！
-                                    cell1.style = Object.create(cell1.style || {});
-
-                                    // 2. 迁移基础对齐、边框与数字格式
-                                    if (cell2.alignment)
-                                        cell1.alignment = Object.assign({}, cell2.alignment);
-                                    if (cell2.border)
-                                        cell1.border = Object.assign({}, cell2.border);
-                                    if (cell2.numFmt) cell1.numFmt = cell2.numFmt;
-
-                                    // 3. 🛠️【动态涂色修复】：根据用户下拉菜单的选择，按需对点对点孤立单元格进行精准着色
-                                    if (chosenColor !== 'NONE') {
-                                        cell1.fill = {
-                                            type: 'pattern',
-                                            pattern: 'solid',
-                                            fgColor: { argb: chosenColor },
-                                        };
-                                        // 黄色属于浅色，白字看不清，故切为黑字；其余暗色系配纯白字保证高对比度
-                                        const isLightColor = chosenColor === 'FFFFFF00';
-                                        const baseFont = cell2.font || {};
-                                        cell1.font = Object.assign({}, baseFont, {
-                                            color: { argb: isLightColor ? 'FF000000' : 'FFFFFFFF' },
-                                        });
+                                        val1Str = String(cell1.value.result);
                                     } else {
-                                        if (cell2.font) cell1.font = Object.assign({}, cell2.font);
+                                        val1Str = String(cell1.value);
                                     }
-
-                                    mergedRows.push(r);
-                                } else {
-                                    isCovered = '【空 无法覆盖】';
-                                    fillDetail = `（[${file2ShortName}] 对应位置无有效数据，未填入）`;
                                 }
+                                val1Str = val1Str.replace(/[\s\u00A0\u200B\r\n]/g, '');
+
+                                let isCovered = '【有值 正常跳过】';
+                                let fillDetail = '';
+
+                                if (val1Str === '') {
+                                    if (cell2.value !== null && cell2.value !== undefined) {
+                                        let insertValue = cell2.value;
+                                        if (
+                                            insertValue &&
+                                            typeof insertValue === 'object' &&
+                                            insertValue.result !== undefined
+                                        ) {
+                                            insertValue = insertValue.result;
+                                        }
+                                        fillDetail = `（➔ 成功填入新值: "${JSON.stringify(insertValue)}"）`;
+                                        isCovered = '【空 触发覆盖】';
+                                        cell1.value = cell2.value;
+                                        cell1.style = Object.create(cell1.style || {});
+                                        if (cell2.alignment)
+                                            cell1.alignment = Object.assign({}, cell2.alignment);
+                                        if (cell2.border)
+                                            cell1.border = Object.assign({}, cell2.border);
+                                        if (cell2.numFmt) cell1.numFmt = cell2.numFmt;
+
+                                        if (chosenColor !== 'NONE') {
+                                            cell1.fill = {
+                                                type: 'pattern',
+                                                pattern: 'solid',
+                                                fgColor: { argb: chosenColor },
+                                            };
+                                            const light = chosenColor === 'FFF2BA02';
+                                            const baseFont = cell2.font || {};
+                                            cell1.font = Object.assign({}, baseFont, {
+                                                color: { argb: light ? 'FF000000' : 'FFFFFFFF' },
+                                            });
+                                        } else {
+                                            if (cell2.font)
+                                                cell1.font = Object.assign({}, cell2.font);
+                                        }
+                                        if (!mergedRows.includes(r)) mergedRows.push(r);
+                                    } else {
+                                        fillDetail = `（补充表无数据，无法填充）`;
+                                        isCovered = '【空 无法覆盖】';
+                                    }
+                                }
+
+                                const logMessage = `[${getTimeStamp()}] [行号:${r}] 列:${colName} | 原值:${JSON.stringify(cell1.value)} | ${isCovered} ${fillDetail}`;
+                                capturedLogs.push(logMessage);
+                                console.log(logMessage);
                             }
-
-                            // 4. 生成带毫秒的时间戳前缀
-                            const now = new Date();
-                            const timestamp =
-                                `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ` +
-                                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.` +
-                                `${String(now.getMilliseconds()).padStart(3, '0')}`;
-
-                            const logMessage = `[行号:${r}] 列:${colName} | 原始值: ${rawValue === null ? 'null' : JSON.stringify(rawValue)} | 判定类型: ${valueType} | 是否判定为空: ${isCovered} ${fillDetail}`;
-
-                            // 同时输出到浏览器控制台并存入 PDF 缓存数组
-                            console.log(`[${timestamp}] ` + logMessage);
-                            capturedLogs.push(`[${timestamp}] ${logMessage}`);
                         }
 
-                        // 输出连续行号区间报告
+                        console.log(`遍历完成！总共采集日志：${capturedLogs.length} 条`);
                         if (mergedRows.length > 0) {
                             const intervals = getLineIntervals(mergedRows);
-                            let reportHtml = `<span class='text-green-400 font-bold'>🎉 合并分析成功！共补充了 ${mergedRows.length} 行缺失数据。</span><br><br>`;
+                            let reportHtml = `<span class='text-green-400 font-bold'>🎉 合并成功！共补充 ${mergedRows.length} 行数据。</span><br>`;
                             intervals.forEach((range) => {
-                                reportHtml += `🔹 <span class='text-blue-400'>${range}行</span> ${colName} 列 已成功从 Excel 2 提取并完成覆盖。<br>`;
+                                reportHtml += `🔹 <span class='text-blue-400'>${range}行</span> ${targetColumns.join('、')} 完成填充<br>`;
                             });
                             $('#statusReport').html(reportHtml);
                         } else {
                             $('#statusReport').html(
-                                "<span class='text-gray-400'>检查完毕：指定范围内的 Excel 1 目标列全部有值，未触发任何数据覆盖。</span>",
+                                "<span class='text-gray-400'>全部目标列已有内容，未执行填充。</span>",
                             );
                         }
-
-                        // 激活下载按钮样式
                         $('#btnDownload')
                             .removeAttr('disabled')
                             .removeClass('bg-slate-300 text-slate-500 cursor-not-allowed')
-                            .addClass(
-                                'bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]',
-                            );
-                    } catch (error) {
-                        console.error(error);
+                            .addClass('bg-green-600 text-white hover:bg-green-700');
+                    } catch (err) {
+                        console.error(err);
                         $('#statusReport').html(
-                            `<span class='text-red-500'>❌ 处理失败，请确保格式正确且未在本地打开。错误信息: ${error.message}</span>`,
+                            `<span class='text-red-500'>❌ 处理失败：${err.message}</span>`,
                         );
+                    } finally {
+                        isRunning = false;
                     }
                 });
 
-                // 下载处理好的表格并导出 PDF 报告
+                // ====================== 下载按钮 ======================
                 $('#btnDownload').click(async function () {
                     if (!workbook1) return;
                     $('#statusReport').append(
-                        "<br><span class='text-yellow-400 animate-pulse'>正在打包生成 Excel 与 详细覆盖 PDF 报告中...</span>",
+                        "<br><span class='text-yellow-400 animate-pulse'>正在打包文件...</span>",
                     );
-
-                    // 1. 生成全局统一样式的时间戳后缀 (格式：20260730120526)
                     const now = new Date();
                     const timeStr =
                         `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}` +
                         `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
 
-                    // 2. 导出 Excel（动态添加真实文件名和时间戳后缀）
+                    // 导出Excel
                     const buffer = await workbook1.xlsx.writeBuffer();
                     const blob = new Blob([buffer], {
                         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
-
-                    // 动态提取基础表的不带后缀纯名称，并拼接时间戳
                     const baseName = actualFile1Name.replace(/\.xlsx$/i, '');
                     link.download = `[已自动合并]_${baseName}-${timeStr}.xlsx`;
                     link.click();
 
-                    // 3. 构建并导出含有“真实文件名清单”的 PDF 报告
-                    const pdfContainer = document.createElement('div');
-                    pdfContainer.style.padding = '30px';
-                    pdfContainer.style.fontFamily = 'sans-serif';
-                    pdfContainer.style.color = '#333';
-                    pdfContainer.style.backgroundColor = '#fff';
+                    // 导出SVG报告
+                    await exportSvgReport(timeStr);
 
-                    // 写入 PDF 头部标题及动态提取的真实文件数据清单摘要
-                    let pdfHtml = `
-        <h2 style="text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 5px; color: #1e293b; font-size: 22px;">数据自动覆盖合并分析报告</h2>
-        <div style="font-size: 11px; color: #64748b; text-align: center; margin-bottom: 20px;">生成时间: ${now.toLocaleString()}</div>
-        
-        <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 12px; line-height: 1.6;">
-        <strong style="color: #334155;">📁 本次合并处理文件清单及配置参数：</strong><br>
-          <span style="color: #475569;">• <b>基础母表 (Excel 1)：</b>${actualFile1Name}</span><br>
-          <span style="color: #475569;">• <b>数据源表 (Excel 2)：</b>${actualFile2Name}</span><br>
-          <span style="color: #475569;">• <b>联合唯一校验列 (KEY)：</b><span style="color: #2563eb; font-weight: bold;">${$('#uniqueKeyColumns').val().trim().toUpperCase()}</span></span><br>
-
-                    <span style="color: #475569;">• <b>覆盖单元格标记色：</b><span style="color: #1e293b; font-weight: bold;">${$('#fillColorSelect option:selected').text()}</span></span>
-        </div>
-
-        <!-- 新增：二、联合唯一KEY同行比对失败异常拦截账本 -->
-        <h3 style="color: #b45309; border-left: 4px solid #f59e0b; padding-left: 8px; margin-top: 20px; font-size: 14px;">一、联合唯一KEY同行比对失败拦截账本 (未进行任何覆盖)</h3>
-        <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 11px;">
-            ${
-                mismatchRows.length === 0
-                    ? '<span style="color: #16a34a; font-weight: bold;">➔ 完美通关！全表未发现任何同行 KEY 错配现象。</span>'
-                    : `<table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid #fcd34d; color: #92400e;">
-                            <th style="padding: 4px;">错配行号</th>
-                            <th style="padding: 4px;">Excel 1 (基础表) 关键特征</th>
-                            <th style="padding: 4px;">Excel 2 (补充表) 关键特征</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${mismatchRows
-                            .map(
-                                (item) => `
-                            <tr style="border-bottom: 1px solid #fef3c7; color: #b45309;">
-                                <td style="padding: 6px 4px; font-weight: bold;">第 ${item.row} 行</td>
-                                <td style="padding: 6px 4px; font-family: monospace;">[ ${item.k1 || '空'} ]</td>
-                                <td style="padding: 6px 4px; font-family: monospace;">[ ${item.k2 || '空'} ]</td>
-                            </tr>
-                        `,
-                            )
-                            .join('')}
-                    </tbody>
-                 </table>`
-            }
-        </div>
-      `;
-
-                    // 抓取并写入前端页面上的“状态报告区总结文案”
-                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #10b981; padding-left: 8px; font-size: 14px;">二、前台分析总结报告</h3>`;
-                    const currentSummary = $('#statusReport')
-                        .html()
-                        .replace(/正在打包.*/, '') // 剔除打包中动态提示语
-                        .replace(/text-green-400/g, 'text-green-600')
-                        .replace(/text-blue-400/g, 'text-blue-600');
-
-                    pdfHtml += `<div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; font-size: 13px; border-radius: 6px; line-height: 1.5; color: #14532d;">${currentSummary}</div>`;
-
-                    // 按顺序写入所有捕捉到的详细日志序列
-                    pdfHtml += `<h3 style="color: #475569; border-left: 4px solid #3b82f6; padding-left: 8px; margin-top: 20px; font-size: 14px;">三、控制台详细执行序列（含填入内容）</h3>`;
-
-                    // 按顺序写入所有捕捉到的详细日志序列
-                    pdfHtml += `<div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; font-family: monospace; font-size: 10px; line-height: 1.7; white-space: pre-wrap; margin-bottom: 25px;">`;
-
-                    if (capturedLogs.length === 0) {
-                        pdfHtml += `暂无遍历记录`;
-                    } else {
-                        const formattedLogs = capturedLogs.map((log) => {
-                            return log
-                                .replace(
-                                    /( 成功填入新值 : ".*?")/g,
-                                    '<span style="color: #16a34a; font-weight: bold;">$1</span>',
-                                )
-                                .replace(
-                                    /(【空 触发覆盖】)/g,
-                                    '<span style="color: #dc2626; font-weight: bold;">$1</span>',
-                                );
-                        });
-                        pdfHtml += formattedLogs.join('\n');
-                    }
-                    pdfHtml += `</div>`;
-
-                    pdfContainer.innerHTML = pdfHtml;
-
-                    // 配置 html2pdf 参数并驱动浏览器下载带有统一样式时间戳的 PDF 报告
-                    const pdfOptions = {
-                        margin: 15,
-                        filename: `合并报告-${timeStr}.pdf`,
-                        image: { type: 'jpeg', quality: 0.8 },
-                        html2canvas: { scale: 3, useCORS: true },
-                        pagebreak: { mode: ['avoid-all', 'css'] },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    };
-
-                    // 执行 PDF 转换并唤起浏览器并行下载
-                    html2pdf()
-                        .set(pdfOptions)
-                        .from(pdfContainer)
-                        .save()
-                        .then(() => {
-                            $('#statusReport').find('.animate-pulse').remove(); // 移除加载动画
-                            $('#statusReport').append(
-                                `<br><span class='text-green-500 font-bold'> [${now.toLocaleTimeString()}] 『Excel表格』与『PDF详细覆盖报告』已同步成功下载！ </span>`,
-                            );
-                        });
-                });
-
-                // 核心算法：将离散的数组行号压缩为类似 "1-100" 形式的连续区间
-                function getLineIntervals(rows) {
-                    if (rows.length === 0) return [];
-                    rows.sort((a, b) => a - b);
-                    let result = [];
-                    let start = rows[0];
-                    let end = rows[0];
-
-                    for (let i = 1; i < rows.length; i++) {
-                        if (rows[i] === end + 1) {
-                            end = rows[i];
-                        } else {
-                            result.push(start === end ? `${start}` : `${start}-${end}`);
-                            start = rows[i];
-                            end = rows[i];
-                        }
-                    }
-                    result.push(start === end ? `${start}` : `${start}-${end}`);
-                    return result;
-                }
-            });
-            // 换诗句按钮（保留原有功能）
-            $('#btnRefreshPoem').click(function () {
-                const poems = [
-                    '答案很长，我准备用一生的时间来回答。—— 林徽因',
-                    '山野万里，你是我藏在微风里的欢喜',
-                    '世界一般，但你超值',
-                    '朝暮与年岁并往，愿与你行至天光',
-                    '死生契阔，与子成说。执子之手，与子偕老。——《诗经·击鼓》',
-                    '山有木兮木有枝，心悦君兮君不知。——《越人歌》',
-                    '玲珑骰子安红豆，入骨相思知不知。——温庭筠',
-                    '晓看天色暮看云，行也思君，坐也思君。——唐寅',
-                    '愿我如星君如月，夜夜流光相皎洁。——范成大',
-                    '两情若是久长时，又岂在朝朝暮暮。——秦观',
-                    '曾经沧海难为水，除却巫山不是云。——元稹',
-                    '身无彩凤双飞翼，心有灵犀一点通。——李商隐',
-                    '在天愿作比翼鸟，在地愿为连理枝。——白居易',
-                    '只愿君心似我心，定不负相思意。——李之仪',
-                    '南风知我意，吹梦到西洲。——《西洲曲》',
-                    '愿得一心人，白头不相离。——卓文君',
-                    '入我相思门，知我相思苦。——李白',
-                    '一日不见，如三月兮。——《诗经·子衿》',
-                    '蒹葭苍苍，白露为霜。所谓伊人，在水一方。——《诗经·蒹葭》',
-                    '不要问我心里有没有你，我余光中都是你。——余光中',
-                    '草在结它的种子，风在摇它的叶子，我们站着，不说话，就十分美好。——顾城',
-                    '今夜我不关心人类，我只想你。——海子',
-                    '每想你一次，天上飘落一粒沙，从此形成了撒哈拉。——三毛',
-                    '静下来想你，觉得一切都美好得不可思议。——王小波',
-                    '见了你，我低到尘埃里，然后开出花来。——张爱玲',
-                    '我想和你虚度时光，直到星光铺满旷野。——李元胜',
-                    '龙应当藏在云里，你应当藏在心里。——沈从文',
-                    '我见到她之前，从未想到要结婚。——钱钟书',
-                    '如何让你遇见我，在我最美丽的时刻。——席慕蓉',
-                    '你再不来，我要下雪了。——木心',
-                    '若去见你，我一定用跑的。',
-                    '斯人若彩虹，遇上方知有。',
-                    '山河远阔，人间烟火。无一是你，无一不是你。',
-                    '既许一人以偏爱，愿尽余生之慷慨。',
-                    '长日欣喜，四季与你。',
-                    '有生之年，欣喜相逢，不偏不倚，刚好是你。',
-                    '与你有关，皆是浪漫。',
-                    '两个愿望：你在身边，在你身边。',
-                    '这世界有那么多人，多幸运我有个我们。',
-                    '始于心动，陷于温柔，有且仅有一个你。',
-                    '目光所及皆是你，心之所向唯有卿。',
-                    '风行过万里，月沉没海底，我遇见世间一切，却只喜欢你。',
-                    '世间万物皆苦，你明目张胆的偏爱就是救赎。',
-                    '有幸相遇，恰好合拍。',
-                    '爱意随风起，风止意难平。',
-                    '漫天星河，皆不如你眼底微光。',
-                    '温一壶月光，与你共度余生朝暮。',
-                    '人间风月浅尝即可，唯独对你一往情深。',
-                    '遇见你之后，我再也没羡慕过任何人。',
-                    '落日沉溺于橘色的海，晚风沦陷于赤诚的爱。',
-                    '风很温柔，花很浪漫，你很特别。',
-                    '我攒了好多年的温柔与浪漫，全部都想给你。',
-                    '岁岁年年，万喜万般宜，朝夕皆有你。',
-                    '人海十万里，我只想要你。',
-                    '幸得识卿桃花面，从此阡陌多暖春。',
-                    '清风明月，远山炊烟，万般风景，不如你伴身边。',
-                    '不用见日月，你就是星辰。',
-                    '人间烟火，山河秋河，无你何欢。',
-                    '从此，有人问我粥可温，有人与我立黄昏。',
-                    '幸遇良人，温酒相伴，岁岁长安。',
-                    '我携满天星辰以赠你，仍觉满天星辰不及你。',
-                    '等风，等月，也等你。',
-                    '平生一顾，至此终年。',
-                    '风月入怀，山河入梦，梦里常有你。',
-                    '纵有千古风月，不抵你眉眼半分。',
-                    '心动开始，余生收尾，主角一直是你。',
-                    '朝看晨雾暮看霞，一年四季皆是他。',
-                    '不求漫天荣光，只求岁岁同往。',
-                    '爱意藏于烟火，余生慢慢与你。',
-                    '跨过星河迈过月亮，奔赴有你的远方。',
-                    '人间千万景色，我独偏爱你这一抹。',
-                    '愿岁月可回首，且以深情共白头。',
-                    '人间忽晚，山河已秋，幸好身边有你。',
-                    '满目星河不及你，一腔欢喜尽予你。',
-                    '待繁花落尽，与你静守流年。',
-                    '我不喜欢世间喧嚣，唯独喜欢你这个人。',
-                    '山海相隔，我也朝你奔赴。',
-                    '岁岁常相见，年年不相负。',
-                    '春风十里，不如你。——冯唐',
-                    '时光荏苒，四季轮换，我的偏爱永远归你。',
-                    '此生固短，无你何欢。',
-                    '与君相向转相亲，与君两世相依允。',
-                    '星光洒落人海，我只望向你的存在。',
-                    '所有温柔眷恋，都是对你的念念不忘。',
-                    '愿朝暮相伴，四季相依，白首不相离。',
-                    '月色与雪色之间，你是第三种绝色。',
-                    '世事茫茫，光阴有限，能遇见你便是万幸。',
-                    '相思绵长，不问归途，一心向你。',
-                    '余生漫漫，喜乐忧愁，都想和你共享。',
-                    '云飘千里，风过四海，我的思念只为你。',
-                    '借人间一杯风月，许你一世朝夕。',
-                    '不问前程几许，只顾朝夕相伴。',
-                    '心有所向，日复一日，必有情深。',
-                    '十里清风万顷星河，都比不上你的回眸。',
-                    '承蒙时光不弃，有幸与你相知。',
-                    '长路漫漫，所幸有你并肩前行。',
-                    '相思相见知何日，此时此夜难为情。——李白',
-                    '天涯地角有穷时，只有相思无尽处。——晏殊',
-                    '但愿人长久，千里共婵娟。——苏轼',
-                    '君生我未生，我生君已老。',
-                    '花开堪折直须折，莫待无花空折枝。——杜秋娘',
-                    '醉后不知天在水，满船清梦压星河，星河不及你。',
-                    '朝起听风雨，暮落伴君旁。',
-                    '万物皆有裂痕，而你是照进来的光。',
-                    '爱意无需喧嚣，岁岁默默相守。',
-                    '哪怕世事沉浮，我亦坚定不移奔向你。',
-                    '山野长风，海上落霞，皆想与你共赏。',
-                    '漫漫浮生，寻一人相守，幸而是你。',
-                    '一纸相思落笔，满心皆是伊人。',
-                    '四季轮回更迭，我的心动永远为你。',
-                    '与你相逢，便是人间最好光景。',
-                    '不必远赴山海，你便是我的世外桃源。',
-                    '余生风雪是你，平淡是你，目光所至皆是你。',
-                ];
-                const random = poems[Math.floor(Math.random() * poems.length)];
-                $('#lovePoem').fadeOut(300, () => {
-                    $('#lovePoem').text(random).fadeIn(500);
+                    $('#statusReport').find('.animate-pulse').remove();
+                    $('#statusReport').append(
+                        `<br><span class='text-green-500 font-bold'>✅ Excel + 报告文件下载完成！</span>`,
+                    );
                 });
             });
         </script>
     </body>
 </html>
-<!-- End-681-2026.07.30.164545 -->
+<!-- End-662-2026.07.31.094407 -->
