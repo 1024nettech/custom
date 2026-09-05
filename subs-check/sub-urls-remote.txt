@@ -1,0 +1,8 @@
+# subs-check sub-urls-remote: https://github.com/beck-8/subs-check
+
+# 1. 1024
+https://1024net.tech/sub/sub.txt
+
+# 2. https://github.com/Au1rxx/free-vpn-subscriptions
+https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt
+
