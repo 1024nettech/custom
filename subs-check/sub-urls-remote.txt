@@ -3,6 +3,10 @@
 # 1. 1024
 https://1024net.tech/sub/sub.txt
 
-# 2. https://github.com/Au1rxx/free-vpn-subscriptions
-https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt
+# 2. https://github.com/yy1588133/proxy-pool
+https://gh-proxy.com/raw.githubusercontent.com/yy1588133/proxy-pool/main/v2ray.txt
 
+# 3. https://github.com/Au1rxx/free-vpn-subscriptions
+https://gh-proxy.com/raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt
+
+# End-12-413-2026.10.20.083103
