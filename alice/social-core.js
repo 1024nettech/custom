@@ -1,9 +1,23 @@
-// social-core.js (此文件放在 GitHub Pages 上)
-// 注意：这里不需要再写 ==UserScript== 头部，直接写执行逻辑
-
+// social-core.js (部署在 GitHub Pages)
 (function () {
     'use strict';
 
+    // 确保油猴桥梁已就绪
+    const bridge = window.TMSocialBridge;
+    if (!bridge) {
+        console.error('油猴桥梁注入失败，请检查外壳脚本。');
+        return;
+    }
+
+    // 检查页面是否配置 jQuery（部分网站自带，若无则动态引入，这里假设油猴已提前注入或网站自带）
+    if (typeof jQuery === 'undefined') return;
+    const $ = jQuery;
+
+    // 清理可能由于单页应用历史遗留的旧面板与定时器
+    $('#tm-social-panel').remove();
+    if (window.tmSocialTimer) clearInterval(window.tmSocialTimer);
+
+    // ================= 配置与选择器 =================
     const SITE_CONFIGS = {
         'channels.weixin.qq.com': {
             name: '视频号',
@@ -137,12 +151,30 @@
             break;
         }
     }
-
     if (!currentConfig) return;
 
-    // 更新外壳上的标题名
-    $('#tm-panel-title').text(`📊 数据看板 (${currentConfig.name})`);
+    // ================= UI 绘制 =================
+    // 使用桥梁调用油猴的数据持久化函数
+    const savedPos = bridge.getValue('panel_position', { top: '100px', left: '100px' });
+    const $panel = $(`
+        <div id="tm-social-panel" style="position:fixed; top:${savedPos.top}; left:${savedPos.left}; z-index:999999; background:#fff; border:1px solid #ccc; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); padding:12px; font-family:Arial,sans-serif; font-size:13px; color:#333; width:180px; cursor:move; user-select:none;">
+            <div style="font-weight:bold; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                <span>📊 数据看板 (${currentConfig.name})</span>
+                <span id="tm-refresh-cache" title="强刷远程代码缓存" style="cursor:pointer; font-size:12px; color:#999; padding:2px 4px;">🔄</span>
+            </div>
+            <div>
+                <div style="margin-bottom: 4px;">播放: <span id="tm-p-play" style="font-weight:600;color:#1890ff;">/</span></div>
+                <div style="margin-bottom: 4px;">点赞: <span id="tm-p-like" style="font-weight:600;color:#52c41a;">/</span></div>
+                <div style="margin-bottom: 4px;">评论: <span id="tm-p-comment" style="font-weight:600;color:#fa8c16;">/</span></div>
+                <div style="margin-bottom: 4px;">收藏: <span id="tm-p-collect" style="font-weight:600;color:#722ed1;">/</span></div>
+                <div style="margin-bottom: 10px;">转发: <span id="tm-p-share" style="font-weight:600;color:#eb2f96;">/</span></div>
+                <button id="tm-copy-btn" style="width:100%; background:#1890ff; color:#fff; border:none; padding:6px; border-radius:4px; cursor:pointer; font-size:12px;">一键复制数据</button>
+            </div>
+        </div>
+    `);
+    $('body').append($panel);
 
+    // ================= 核心抓取逻辑 =================
     function getValueBySelector(selector) {
         if (!selector || selector.trim() === '') return '/';
         const $el = $(selector);
@@ -164,11 +196,10 @@
         };
     }
 
-    // 轮询更新数据
-    const metricsTimer = setInterval(() => {
-        // 如果外壳面板被意外移除了，销毁定时器
+    // 数据动态轮询
+    window.tmSocialTimer = setInterval(() => {
         if ($('#tm-social-panel').length === 0) {
-            clearInterval(metricsTimer);
+            clearInterval(window.tmSocialTimer);
             return;
         }
         const data = getAllMetrics();
@@ -179,7 +210,8 @@
         $('#tm-p-share').text(data.share);
     }, 1000);
 
-    // 一键复制事件（先解绑再绑定，防止重复加载时事件叠加）
+    // ================= 事件交互控制 =================
+    // 一键复制
     $(document)
         .off('click', '#tm-copy-btn')
         .on('click', '#tm-copy-btn', function () {
@@ -188,15 +220,45 @@
                 '\n',
             );
 
-            // 💡 依然可以直接调用 GM_setClipboard，因为它是被 eval 在油猴沙盒内的
-            GM_setClipboard(textToCopy);
+            // 💡 通过桥梁调用剪贴板特权
+            bridge.setClipboard(textToCopy);
 
             const $btn = $(this);
-            const originalText = $btn.text();
             $btn.text('✅ 复制成功！').css('background', '#52c41a');
             setTimeout(() => {
-                $btn.text(originalText).css('background', '#1890ff');
+                $btn.text('一键复制数据').css('background', '#1890ff');
             }, 1200);
         });
+
+    // 刷新远程缓存
+    $(document)
+        .off('click', '#tm-refresh-cache')
+        .on('click', '#tm-refresh-cache', function (e) {
+            e.stopPropagation();
+            if (confirm('是否立即强制更新远程 GitHub 匹配规则与核心代码？')) {
+                bridge.triggerRefresh(); // 💡 通过桥梁触发强刷
+            }
+        });
+
+    // 面板拖拽逻辑
+    $panel.on('mousedown', function (e) {
+        if ($(e.target).is('button') || $(e.target).is('#tm-refresh-cache')) return;
+        const offset = $panel.offset();
+        const startX = e.pageX - offset.left;
+        const startY = e.pageY - offset.top;
+
+        $(document).on('mousemove.dragPanel', function (ev) {
+            let left = ev.pageX - startX - $(window).scrollLeft();
+            let top = ev.pageY - startY - $(window).scrollTop();
+            left = Math.max(0, Math.min(left, $(window).width() - $panel.outerWidth()));
+            top = Math.max(0, Math.min(top, $(window).height() - $panel.outerHeight()));
+            $panel.css({ left: left + 'px', top: top + 'px' });
+        });
+
+        $(document).on('mouseup.dragPanel', function () {
+            $(document).off('.dragPanel');
+            // 💡 拖拽完毕通过桥梁把新位置坐标存进油猴
+            bridge.setValue('panel_position', { top: $panel.css('top'), left: $panel.css('left') });
+        });
+    });
 })();
-// End-202-6253-2026.10.31.180618
