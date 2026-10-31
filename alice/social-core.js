@@ -1,7 +1,7 @@
 // social-core.js (部署在 GitHub Pages)
 (function () {
     'use strict';
-
+alert();
     // 确保油猴桥梁已就绪
     const bridge = window.TMSocialBridge;
     if (!bridge) {
